@@ -50,7 +50,8 @@ def openSoltab(
     if solsetName is None or soltabName is None:
         if address is None:
             logging.error(
-                "Address must be specified if solsetName and soltabName are not given."
+                "Address must be specified if solsetName and soltabName are"
+                " not given."
             )
             sys.exit(1)
         solsetName, soltabName = address.split("/")
@@ -166,7 +167,8 @@ class h5parm(object):
             logging.warning(
                 "Solution-set "
                 + solsetName
-                + " contains unsuported characters. Use [A-Za-z0-9_-]. Switching to default."
+                + " contains unsuported characters. Use [A-Za-z0-9_-]."
+                " Switching to default."
             )
             solsetName = None
 
@@ -556,7 +558,8 @@ class Solset(object):
             logging.warning(
                 "Solution-table "
                 + soltabName
-                + " contains unsuported characters. Use [A-Za-z0-9_-]. Switching to default."
+                + " contains unsuported characters. Use [A-Za-z0-9_-]."
+                " Switching to default."
             )
             soltabName = None
 
@@ -706,7 +709,8 @@ class Solset(object):
         """
         if soltab is None:
             raise Exception(
-                "Solution-table not specified while querying for solution-table."
+                "Solution-table not specified while querying for"
+                " solution-table."
             )
 
         if soltab not in self.getSoltabNames():
@@ -949,7 +953,8 @@ class Soltab(object):
                     logging.warning(
                         'Cannot select on axis "'
                         + axis
-                        + '" with a regular expression. Use all available values.'
+                        + '" with a regular expression. Use all available'
+                        " values."
                     )
                     continue
                 self.selection[idx] = [
@@ -970,12 +975,14 @@ class Soltab(object):
                 # some checks
                 if "min" in selVal and selVal["min"] > np.max(axisVals):
                     logging.error(
-                        "Selection with min > than maximum value. Use all available values."
+                        "Selection with min > than maximum value. Use all"
+                        " available values."
                     )
                     continue
                 if "max" in selVal and selVal["max"] < np.min(axisVals):
                     logging.error(
-                        "Selection with max < than minimum value. Use all available values."
+                        "Selection with max < than minimum value. Use all"
+                        " available values."
                     )
                     continue
 
@@ -997,7 +1004,8 @@ class Soltab(object):
                     # thisSelection[idx] = list(np.where(axisVals<=selVal['max'])[0])
                 else:
                     logging.error(
-                        "Selection with a dict must have 'min' and/or 'max' entry. Use all available values."
+                        "Selection with a dict must have 'min' and/or 'max'"
+                        " entry. Use all available values."
                     )
                     continue
                 if "step" in selVal:
@@ -1412,11 +1420,14 @@ class Soltab(object):
                 "rotationmeasure",
             ]:
                 logging.error(
-                    "Reference possible only for phase, scalarphase, clock, tec, tec3rd, rotation and rotationmeasure solution tables. Ignore referencing."
+                    "Reference possible only for phase, scalarphase, clock,"
+                    " tec, tec3rd, rotation and rotationmeasure solution"
+                    " tables. Ignore referencing."
                 )
             elif "ant" not in self.getAxesNames():
                 logging.error(
-                    "Cannot find antenna axis for referencing phases. Ignore referencing."
+                    "Cannot find antenna axis for referencing phases. Ignore"
+                    " referencing."
                 )
             elif (
                 refAnt not in self.getAxisValues("ant", ignoreSelection=True)
@@ -1514,11 +1525,14 @@ class Soltab(object):
                 "rotationmeasure",
             ]:
                 logging.error(
-                    "Reference possible only for phase, scalarphase, clock, tec, tec3rd, rotation and rotationmeasure solution tables. Ignore referencing."
+                    "Reference possible only for phase, scalarphase, clock,"
+                    " tec, tec3rd, rotation and rotationmeasure solution"
+                    " tables. Ignore referencing."
                 )
             elif "dir" not in self.getAxesNames():
                 logging.error(
-                    "Cannot find direction axis for referencing phases. Ignore referencing."
+                    "Cannot find direction axis for referencing phases. Ignore"
+                    " referencing."
                 )
             elif (
                 refDir not in self.getAxisValues("dir", ignoreSelection=True)
@@ -1590,15 +1604,19 @@ class Soltab(object):
                 "rotationmeasure",
             ]:
                 logging.error(
-                    "Reference possible only for phase, scalarphase, clock, tec, tec3rd, rotation and rotationmeasure solution tables. Ignore referencing."
+                    "Reference possible only for phase, scalarphase, clock,"
+                    " tec, tec3rd, rotation and rotationmeasure solution"
+                    " tables. Ignore referencing."
                 )
             elif "ant" not in self.getAxesNames():
                 logging.error(
-                    "Cannot find antenna axis for referencing phases. Ignore referencing."
+                    "Cannot find antenna axis for referencing phases. Ignore"
+                    " referencing."
                 )
             elif "dir" not in self.getAxesNames():
                 logging.error(
-                    "Cannot find direction axis for referencing phases. Ignore referencing."
+                    "Cannot find direction axis for referencing phases. Ignore"
+                    " referencing."
                 )
             elif (
                 refAnt not in self.getAxisValues("ant", ignoreSelection=True)
@@ -1609,7 +1627,8 @@ class Soltab(object):
                 )
             elif refAnt == "closest":  # TODO: This needs to be implemented...
                 logging.error(
-                    "refAnt='closest' is not supported (yet) when also referencing a direction."
+                    "refAnt='closest' is not supported (yet) when also"
+                    " referencing a direction."
                 )
             elif (
                 refDir not in self.getAxisValues("dir", ignoreSelection=True)

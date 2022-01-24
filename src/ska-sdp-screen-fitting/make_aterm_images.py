@@ -73,11 +73,11 @@ def main(
         soltab_amp = None
         soltab_ph = soltabname
 
-    if type(bounds_deg) is str:
+    if isinstance(bounds_deg) is str:
         bounds_deg = [
             float(f.strip()) for f in bounds_deg.strip("[]").split(";")
         ]
-    if type(bounds_mid_deg) is str:
+    if isinstance(bounds_mid_deg) is str:
         bounds_mid_deg = [
             float(f.strip()) for f in bounds_mid_deg.strip("[]").split(";")
         ]

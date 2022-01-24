@@ -871,7 +871,8 @@ def run(
     screen_type = soltab.getType()
     if screen_type not in ["phase", "amplitude", "tec"]:
         logging.error(
-            'Screens can only be fit to soltabs of type "phase", "tec", or "amplitude".'
+            'Screens can only be fit to soltabs of type "phase", "tec", or'
+            ' "amplitude".'
         )
         return 1
     logging.info(

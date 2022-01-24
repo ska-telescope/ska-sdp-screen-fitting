@@ -256,7 +256,8 @@ def run(
             or weights.shape != weightsI.shape
         ):
             logging.error(
-                "Impossible to merge: two tables have with different axes values."
+                "Impossible to merge: two tables have with different axes"
+                " values."
             )
             return 1
         weightsI[np.where(weights == 0)] = 0.0
