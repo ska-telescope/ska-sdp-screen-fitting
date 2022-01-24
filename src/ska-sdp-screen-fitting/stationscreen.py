@@ -480,9 +480,6 @@ def _fit_screen(
         # Recalculate for unflagged directions
         C, pinvC, U = _calculate_svd(pp, r_0, beta, N_piercepoints)
 
-    if U[0, 0] == -1:
-        print(U)
-        C, pinvC, U = full_matrices
     arg00 = np.transpose(U[:, :order])
     arg01 = np.dot(w, U)[:, :order]
     arg1 = np.dot(arg00, arg01)

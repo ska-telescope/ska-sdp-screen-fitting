@@ -918,8 +918,6 @@ class VoronoiScreen(Screen):
                 t_start_index:t_stop_index, freq_ind, stat_ind, poly.index
             ]
             for t in range(t_stop_index - t_start_index):
-                print(ind[0])
-                print(ind[1])
                 data[t, 0, ind[0], ind[1]] = val_amp_xx[t] * np.cos(
                     val_phase[t]
                 )
