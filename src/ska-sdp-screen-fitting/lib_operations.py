@@ -101,7 +101,8 @@ def reorderAxes(a, oldAxes, newAxes):
     oldAxes : list of str
         A list like ['time','freq','pol'].
         It can contain more axes than the new list, those are ignored.
-        This is to pass to oldAxis the soltab.getAxesNames() directly even on an array from getValuesIter()
+        This is to pass to oldAxis the soltab.getAxesNames() directly even on
+        an array from getValuesIter()
     newAxes : list of str
         A list like ['time','pol','freq'].
 

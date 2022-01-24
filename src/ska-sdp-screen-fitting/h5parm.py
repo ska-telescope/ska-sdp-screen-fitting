@@ -26,7 +26,8 @@ def openSoltab(
     h5parmFile, solsetName=None, soltabName=None, address=None, readonly=True
 ):
     """
-    Convenience function to get a soltab object from an h5parm file and an address like "solset000/phase000".
+    Convenience function to get a soltab object from an h5parm file and an
+    address like "solset000/phase000".
 
     Parameters
     ----------
@@ -37,7 +38,8 @@ def openSoltab(
     soltabName : str
         soltab name
     address : str
-        solset/soltab name (to use in place of the parameters solset and soltab).
+        solset/soltab name (to use in place of the parameters solset and
+        soltab)
     readonly : bool, optional
         if True the table is open in readonly mode, by default True.
 
@@ -101,7 +103,8 @@ class h5parm(object):
                     BUFFER_TIMES=500,
                 )
 
-            # Check if it's a valid H5parm file: attribute h5parm_version should be defined in any solset
+            # Check if it's a valid H5parm file: attribute h5parm_version
+            # should be defined in any solset
             is_h5parm = True
             for node in self.H.root:
                 if "h5parm_version" not in node._v_attrs:
@@ -320,7 +323,7 @@ class h5parm(object):
 
         # Filter on solset name
         if filter is not None:
-            info += "\nFiltering on solution set name with filter = '{0}'\n".format(
+            info += "\nFiltering on solution set name with filter = '{0}'\n".format(  # NOQA: E501
                 filter
             )
             solsets = [
@@ -392,7 +395,8 @@ class h5parm(object):
                         if verbose:
                             f.write(axisName + ": ")
                             vals = soltab.getAxisValues(axisName)
-                            # ugly hardcoded workaround to print all the important decimal values for time/freq
+                            # ugly hardcoded workaround to print all the
+                            # important decimal values for time/freq
                             if axisName == "freq":
                                 f.write(
                                     " ".join(
@@ -523,7 +527,8 @@ class Solset(object):
         soltype : str
             Solution-type (e.g. amplitude, phase)
         soltabName : str, optional
-            The solution-table name, if not specified is generated from the solution-type
+            The solution-table name, if not specified is generated from the
+            solution-type
         axesNames : list
             List with the axes names
         axesVals : list
@@ -597,8 +602,14 @@ class Solset(object):
             )
 
         # create the val/weight Carrays
-        # val = self.obj._v_file.create_carray('/'+self.name+'/'+soltabName, 'val', obj=vals.astype(np.float64), chunkshape=None, atom=tables.Float64Atom())
-        # weight = self.obj._v_file.create_carray('/'+self.name+'/'+soltabName, 'weight', obj=weights.astype(np.float16), chunkshape=None, atom=tables.Float16Atom())
+        # val = self.obj._v_file.create_carray('/'+self.name+'/'+soltabName,
+        # 'val', obj=vals.astype(np.float64), chunkshape=None,
+        # atom=tables.Float64Atom())
+
+        # weight = self.obj._v_file.create_carray('/'+self.name+'/'+
+        # soltabName,'weight', obj=weights.astype(np.float16),
+        # chunkshape=None, atom=tables.Float16Atom())
+
         # array do not have compression but are much faster
         val = self.obj._v_file.create_array(
             "/" + self.name + "/" + soltabName,
@@ -668,7 +679,8 @@ class Solset(object):
         Returns
         -------
         list
-            List of solution tables objects for all available soltabs in this solset
+            List of solution tables objects for all available soltabs in this
+            solset
         """
         soltabs = []
         for soltab in self.obj._v_groups.values():
@@ -731,7 +743,8 @@ class Solset(object):
         Returns
         -------
         dict
-            Available antennas in the form {name1:[position coords], name2:[position coords], ...}.
+            Available antennas in the form {name1:[position coords],
+            name2:[position coords], ...}.
         """
         ants = {}
         try:
@@ -749,7 +762,8 @@ class Solset(object):
         Returns
         -------
         dict
-            Available sources in the form {name1:[ra,dec], name2:[ra,dec], ...}.
+            Available sources in the form {name1:[ra,dec], name2:[ra,dec],
+            ...}.
         """
         sources = {}
         try:
@@ -772,7 +786,8 @@ class Solset(object):
         Returns
         -------
         str
-            Dict of distances to each antenna. The distance with the antenna "ant" is 0.
+            Dict of distances to each antenna. The distance with the antenna
+            "ant" is 0.
         """
         if ant is None:
             raise "Missing antenna name."
@@ -809,7 +824,8 @@ class Soltab(object):
         axisName = 'xxx' # regular expression selection
         axisName = {min: xxx} # to selct values grater or equal than xxx
         axisName = {max: yyy} # to selct values lower or equal than yyy
-        axisName = {min: xxx, max: yyy} # to selct values greater or equal than xxx and lower or equal than yyy
+        axisName = {min: xxx, max: yyy} # to selct values greater or equal
+                   than xxx and lower or equal than yyy
     """
 
     def __init__(self, soltab, useCache=False, args={}):
@@ -827,7 +843,8 @@ class Soltab(object):
         axesNamesInH5 = soltab.val.attrs["AXES"].decode()
         self.axesNames = axesNamesInH5.split(",")
 
-        # dict of axes values, set once to speed up calls (a bit of memory usage though)
+        # dict of axes values,set once to speed up calls (a bit of memory
+        # usage)
         self.axes = {}
         for axis in self.getAxesNames():
             self.axes[axis] = soltab._f_get_child(axis)
@@ -882,7 +899,8 @@ class Soltab(object):
 
     def getSolset(self):
         """
-        This is used to obtain the parent solset object to e.g. get antennas or create new soltabs.
+        This is used to obtain the parent solset object to e.g. get antennas
+        or create new soltabs.
 
         Returns
         -------
@@ -918,10 +936,13 @@ class Soltab(object):
         Parameters
         ----------
         **args :
-            Valid axes names of the form: pol='XX', ant=['CS001HBA','CS002HBA'], time={'min':1234,'max':'2345','step':4}.
+            Valid axes names of the form: pol='XX',
+            ant=['CS001HBA','CS002HBA'],
+            time={'min':1234,'max':'2345','step':4}.
 
         update : bool
-            Only update axes passed as arguments, the rest is maintained. Default: False.
+            Only update axes passed as arguments, the rest is maintained.
+            Default: False.
 
         """
         # create an initial selection which selects all values
@@ -963,7 +984,8 @@ class Soltab(object):
                     if re.search(selVal, item)
                 ]
 
-                # transform list of 1 element in a relative slice(), faster as it gets reference
+                # transform list of 1 element in a relative slice(), faster as
+                # it gets reference
                 if len(self.selection[idx]) == 1:
                     self.selection[idx] = slice(
                         self.selection[idx][0], self.selection[idx][0] + 1
@@ -991,17 +1013,22 @@ class Soltab(object):
                         np.where(axisVals >= selVal["min"])[0][0],
                         np.where(axisVals <= selVal["max"])[0][-1] + 1,
                     )
-                    # thisSelection[idx] = list(np.where((axisVals>=selVal['min']) & (axisVals<=selVal['max']))[0])
+                    # thisSelection[idx] =
+                    # list(np.where((axisVals>=selVal['min']) &
+                    # (axisVals<=selVal['max']))[0])
+
                 elif "min" in selVal:
                     self.selection[idx] = slice(
                         np.where(axisVals >= selVal["min"])[0][0], None
                     )
-                    # thisSelection[idx] = list(np.where(axisVals>=selVal['min'])[0])
+                    # thisSelection[idx] =
+                    # list(np.where(axisVals>=selVal['min'])[0])
                 elif "max" in selVal:
                     self.selection[idx] = slice(
                         0, np.where(axisVals <= selVal["max"])[0][-1] + 1
                     )
-                    # thisSelection[idx] = list(np.where(axisVals<=selVal['max'])[0])
+                    # thisSelection[idx] =
+                    # list(np.where(axisVals<=selVal['max'])[0])
                 else:
                     logging.error(
                         "Selection with a dict must have 'min' and/or 'max'"
@@ -1022,7 +1049,8 @@ class Soltab(object):
                     selVal = selVal.tolist()
                 if not type(selVal) is list:
                     selVal = [selVal]
-                # convert to correct data type (from parset everything is a str)
+                # convert to correct data type (from parset everything is a
+                # string)
                 if not self.getAxisType(axis).type is np.string_:
                     selVal = np.array(selVal, dtype=self.getAxisType(axis))
                 else:
@@ -1046,12 +1074,14 @@ class Soltab(object):
                         if item in selVal
                     ]
 
-                # transform list of 1 element in a relative slice(), faster as it gets a reference
+                # transform list of 1 element in a relative slice(), faster as
+                # it gets a reference
                 if len(self.selection[idx]) == 1:
                     self.selection[idx] = slice(
                         self.selection[idx][0], self.selection[idx][0] + 1
                     )
-                # transform list of continuous numbers in slices, faster as it gets a reference
+                # transform list of continuous numbers in slices, faster as
+                # it gets a reference
                 elif (
                     len(self.selection[idx]) != 0
                     and len(self.selection[idx]) - 1
@@ -1061,7 +1091,8 @@ class Soltab(object):
                         self.selection[idx][0], self.selection[idx][-1] + 1
                     )
 
-            # if a selection return an empty list (maybe because of a wrong name), then use all values
+            # if a selection return an empty list
+            # (maybe because of a wrong name), then use all values
             if (
                 type(self.selection[idx]) is list
                 and len(self.selection[idx]) == 0
@@ -1107,7 +1138,8 @@ class Soltab(object):
         axis : str
             The name of the axis.
         ignoreSelection : bool, optional
-            If True returns the axis lenght without any selection active, by default False.
+            If True returns the axis lenght without any selection active,
+            by default False.
 
         Returns
         -------
@@ -1145,7 +1177,8 @@ class Soltab(object):
         axis : str
             The name of the axis.
         ignoreSelection : bool, optional
-            If True returns the axis values without any selection active, by default False.
+            If True returns the axis values without any selection active,
+            by default False.
 
         Returns
         -------
@@ -1194,15 +1227,19 @@ class Soltab(object):
         Parameters
         ----------
         vals : array, float
-            values to write as an n-dimentional array which match the selection dimention
+            values to write as an n-dimentional array which match the
+            selection dimention
             if a float is passed or the selected data are set to that value
 
         selection : selection format, optional
-            To set only a subset of data, overriding global selectioan, by default use global selection.
-            This is used to set values in a loop of getValueIter(). Global seclection is NOT overwritten.
+            To set only a subset of data, overriding global selectioan,
+            by default use global selection.
+            This is used to set values in a loop of getValueIter().
+            Global seclection is NOT overwritten.
 
         weight : bool, optional
-            If true store in the weights instead that in the vals, by default False
+            If true store in the weights instead that in the vals,
+            by default False
         """
         if selection is None:
             selection = self.selection
@@ -1218,15 +1255,19 @@ class Soltab(object):
             else:
                 dataVals = self.obj.val
 
-        # NOTE: pytables has a nasty limitation that only one list can be applied when selecting.
+        # NOTE: pytables has a nasty limitation that only one list can be
+        # applied when selecting.
         # Conversely, one can apply how many slices he wants.
         # Single values/contigous values are converted in slices in h5parm.
-        # This try/except implements a workaround for this limitation. Once the pytables will be updated, the except can be removed.
+        # This try/except implements a workaround for this limitation.
+        # Once the pytables will be updated, the except can be removed.
         try:
-            # the float check allows quick reset of large arrays to a single value
+            # the float check allows quick reset of large arrays to a
+            # single value
             if isinstance(vals, (np.floating, float)):
                 dataVals[tuple(selection)] = vals
-            # the reshape is needed when saving e.g. [512] (vals shape) into [512,1,1] (selection output)
+            # the reshape is needed when saving e.g. [512] (vals shape)
+            # into [512,1,1] (selection output)
             else:
                 dataVals[tuple(selection)] = np.reshape(
                     vals, dataVals[tuple(selection)].shape
@@ -1249,7 +1290,8 @@ class Soltab(object):
                 ]
             ):
                 for i, selectionListIdx in enumerate(selectionListsIdx[1:]):
-                    # this is the sub selection which has a slice for every slice and a single value for every list
+                    # this is the sub selection which has a slice for every
+                    # slice and a single value for every list
                     subSelection[selectionListIdx] = selectionListValsIter[i]
                     subSelectionForVals[selectionListIdx] = i
                 if type(vals) == float:
@@ -1293,10 +1335,12 @@ class Soltab(object):
             # return None
 
     def _applyAdvSelection(self, data, selection):
-        # NOTE: pytables has a nasty limitation that only one list can be applied when selecting.
+        # NOTE: pytables has a nasty limitation that only one list can be
+        # applied when selecting.
         # Conversely, one can apply how many slices he wants.
         # Single values/contigous values are converted in slices in h5parm.
-        # This implements a workaround for this limitation. Once the pytables will be updated, the except can be removed.
+        # This implements a workaround for this limitation. Once the pytables
+        # will be updated, the except can be removed.
         if np.sum([1.0 for sel in selection if type(sel) is list]) > 1 and (
             type(data) is np.ndarray
             or np.sum([len(sel) - 1 for sel in selection if type(sel) is list])
@@ -1305,7 +1349,8 @@ class Soltab(object):
 
             # logging.debug('Optimizing selection reading '+str(selection))
             # for performances is important to minimize the fetched data
-            # move all slices at the first selection and lists afterwards (first list is allowd in firstselection)
+            # move all slices at the first selection and lists afterwards
+            # (first list is allowd in firstselection)
             selectionListsIdx = [
                 i for i, s in enumerate(selection) if type(s) is list
             ]
@@ -1315,7 +1360,10 @@ class Soltab(object):
             # create a second selection using np.ix_
             secondSelection = []
             for i, sel in enumerate(selection):
-                # if i == selectionListsIdx[0]: secondSelection.append(range(self.getAxisLen(self.getAxesNames()[i], ignoreSelection=False)))
+                # if i == selectionListsIdx[0]:
+                # secondSelection.append(range(
+                # self.getAxisLen(self.getAxesNames()[i],
+                # ignoreSelection=False)))
                 if i == selectionListsIdx[0]:
                     secondSelection.append(list(range(len(sel))))
                 elif type(sel) is list:
@@ -1371,7 +1419,8 @@ class Soltab(object):
         self, retAxesVals=True, weight=False, refAnt=None, refDir=None
     ):
         """
-        Creates a simple matrix of values. Fetching a copy of all selected rows into memory.
+        Creates a simple matrix of values. Fetching a copy of all selected rows
+        into memory.
 
         Parameters
         ----------
@@ -1382,10 +1431,13 @@ class Soltab(object):
         weight : bool, optional
             If true get the weights instead that the vals, by defaul False.
         refAnt : str, optional
-            In case of phase or rotation solutions, reference to this station name. By default no reference.
+            In case of phase or rotation solutions, reference to this station
+            name.
+            By default no reference.
             If "closest" reference to the closest antenna.
         refDir : str, optional
-            In case of phase or rotation solutions, reference to this Direction. By default no reference.
+            In case of phase or rotation solutions, reference to this Direction
+            By default no reference.
             If "center", reference to the central direction.
 
         Returns
@@ -1409,7 +1461,8 @@ class Soltab(object):
 
         # CASE 1: Reference only to ant
         if refAnt and not refDir:
-            # TODO: Should there be a warning if only ant is referenced but multiple directions are present?
+            # TODO: Should there be a warning if only ant is referenced but
+            # multiple directions are present?
             if not self.getType() in [
                 "phase",
                 "scalarphase",
@@ -1467,7 +1520,8 @@ class Soltab(object):
                             list(antDists.values()).index(
                                 sorted(antDists.values())[1]
                             )
-                        ]  # get the second closest antenna (the first is itself)
+                        ]
+                        # get the second closest antenna (the first is itself)
 
                         refSelection[antAxis] = [
                             self.getAxisValues("ant", ignoreSelection=True)
@@ -1510,10 +1564,13 @@ class Soltab(object):
                             axis=antAxis,
                             repeats=len(self.getAxisValues("ant")),
                         )
-                # if not weight and not self.getType() != 'tec' and not self.getType() != 'clock' and not self.getType() != 'tec3rd' and not self.getType() != 'rotationmeasure':
+                # if not weight and not self.getType() != 'tec' and not
+                # self.getType() != 'clock' and not self.getType() !=
+                # 'tec3rd' and not self.getType() != 'rotationmeasure':
                 #     dataVals = normalize_phase(dataVals)
         # CASE 2: Reference only to dir
-        # TODO: should there be a warning if only direction is referenced but multipled ants are present?
+        # TODO: should there be a warning if only direction is referenced but
+        # multipled ants are present?
         elif refDir and not refAnt:
             if not self.getType() in [
                 "phase",
@@ -1589,7 +1646,9 @@ class Soltab(object):
                         axis=dirAxis,
                         repeats=len(self.getAxisValues("dir")),
                     )
-                # if not weight and not self.getType() != 'tec' and not self.getType() != 'clock' and not self.getType() != 'tec3rd' and not self.getType() != 'rotationmeasure':
+                # if not weight and not self.getType() != 'tec'
+                # and not self.getType() != 'clock' and not self.getType() !=
+                # 'tec3rd' and not self.getType() != 'rotationmeasure':
                 #     dataVals = normalize_phase(dataVals)
 
         # CASE 3: Reference to ant and to dir
@@ -1707,15 +1766,19 @@ class Soltab(object):
         self, returnAxes=[], weight=False, refAnt=None, refDir=None
     ):
         """
-        Return an iterator which yields the values matrix (with axes = returnAxes) iterating along the other axes.
-        E.g. if returnAxes are ['freq','time'], one gets a interetion over all the possible NxM
-        matrix where N are the freq and M the time dimensions. The other axes are iterated in the getAxesNames() order.
-        Note that all the data are fetched in memory before returning them one at a time. This is quicker.
+        Return an iterator which yields the values matrix
+        (with axes = returnAxes) iterating along the other axes.
+        E.g. if returnAxes are ['freq','time'], one gets a interetion over
+        all the possible NxM matrix where N are the freq and M the time
+        dimensions. The other axes are iterated in the getAxesNames() order.
+        Note that all the data are fetched in memory before returning
+        them one at a time. This is quicker.
 
         Parameters
         ----------
         returnAxes : list
-            Axes of the returned array, all _others_ will be cycled on each element combinations.
+            Axes of the returned array, all _others_ will be cycled on each
+            element combinations.
         weight : bool, optional
             If true return also the weights, by default False.
         refAnt : str
@@ -1725,11 +1788,14 @@ class Soltab(object):
 
         Returns
         -------
-        1) data ndarray of dim=dim(returnAxes) and with the axes ordered as in getAxesNames()
-        2) (if weight == True) weigth ndarray of dim=dim(returnAxes) and with the axes ordered as in getAxesNames()
+        1) data ndarray of dim=dim(returnAxes) and with the axes ordered as
+        in getAxesNames()
+        2) (if weight == True) weigth ndarray of dim=dim(returnAxes) and with
+        the axes ordered as in getAxesNames()
         3) a dict with axis values in the form:
         {'axisname1':[axisvals1],'axisname2':[axisvals2],...}
-        4) a selection which should be used to write this data back using a setValues()
+        4) a selection which should be used to write this data back using a
+        setValues()
         """
         if weight:
             weigthVals = self.getValues(
@@ -1747,8 +1813,8 @@ class Soltab(object):
         ]
 
         # generator to cycle over all the combinations of iterAxes
-        # it "simply" gets the indexes of this particular combination of iterAxes
-        # and use them to refine the selection.
+        # it "simply" gets the indexes of this particular combination of
+        # iterAxes and use them to refine the selection.
         def g():
             for axisIdx in np.ndindex(tuple(iterAxesDim)):
                 refSelection = []
@@ -1758,19 +1824,25 @@ class Soltab(object):
                 for j, axisName in enumerate(self.getAxesNames()):
                     if axisName in returnAxes:
                         thisAxesVals[axisName] = self.getAxisValues(axisName)
-                        # add a slice with all possible values (main selection is preapplied)
+                        # add a slice with all possible values (main selection
+                        # is preapplied)
                         refSelection.append(slice(None))
-                        # for the return selection use the "main" selection for the return axes
+                        # for the return selection use the "main" selection for
+                        #  the return axes
                         returnSelection.append(self.selection[j])
                     else:
-                        # TODO: the iteration axes are not into a 1 element array, is it a problem?
+                        # TODO: the iteration axes are not into a 1 element
+                        # array, is it a problem?
                         thisAxesVals[axisName] = self.getAxisValues(axisName)[
                             axisIdx[i]
                         ]
-                        # add this index to the refined selection, this will return a single value for this axis
-                        # an int is appended, this will remove an axis from the final data
+                        # add this index to the refined selection, this will
+                        # return a single value for this axis
+                        # an int is appended, this will remove an axis from the
+                        #  final data
                         refSelection.append(axisIdx[i])
-                        # for the return selection use the complete axis and find the correct index
+                        # for the return selection use the complete axis and
+                        # find the correct index
                         returnSelection.append(
                             [
                                 self.getAxisValues(
@@ -1831,7 +1903,7 @@ class Soltab(object):
         Returns
         -------
         str
-            The table history as a string with each entry separated by newlines.
+            The table history as a string with each entry separated by newlines
         """
         attrs = self.obj.val.attrs._f_list("user")
         attrs.sort()

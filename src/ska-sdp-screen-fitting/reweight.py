@@ -221,7 +221,8 @@ def run(
     Parameters
     ----------
     mode : str, optional
-        One of 'uniform' (single value), 'window' (sliding window in time), or 'copy' (copy from another table), by default 'uniform'.
+        One of 'uniform' (single value), 'window' (sliding window in time), or
+        'copy' (copy from another table), by default 'uniform'.
     weightVal : float, optional
         Set weights to this values (0=flagged), by default 1.
     nmedian : odd int, optional
@@ -230,11 +231,14 @@ def run(
         subtracted to detrend them. If 0, no smoothing or subtraction is
         done, by default 3.
     nstddev : odd int, optional
-        Standard deviation window size in number of timeslots for 'window' mode, by default 251.
+        Standard deviation window size in number of timeslots for 'window'
+        mode, by default 251.
     soltabImport : str, optional
-        Name of a soltab. Copy weights from this soltab (must have same axes shape), by default none.
+        Name of a soltab. Copy weights from this soltab (must have same
+        axes shape), by default none.
     flagBad : bool, optional
-        Re-apply flags to bad values (1 for amp, 0 for other tables), by default False.
+        Re-apply flags to bad values (1 for amp, 0 for other tables),
+        by default False.
     """
 
     import numpy as np

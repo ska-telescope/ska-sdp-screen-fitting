@@ -101,7 +101,8 @@ class Screen(object):
 
     def interpolate(self, interp_kind="nearest"):
         """
-        Interpolate the slow amplitude values to the fast-phase time and frequency grid
+        Interpolate the slow amplitude values to the fast-phase time and
+        frequency grid
 
         Parameters
         ----------
@@ -198,10 +199,11 @@ class Screen(object):
         ncpu,
     ):
         """
-        Makes the matrix of values for the given time, frequency, and station indices
+        Makes the matrix of values for the given time, frequency, and station
+        indices
 
-        This method should be defined in the subclasses, but should conform to the inputs
-        below.
+        This method should be defined in the subclasses, but should conform to
+        the inputs below.
 
         Parameters
         ----------
@@ -216,7 +218,8 @@ class Screen(object):
         cellsize_deg : float
             Size of one pixel in degrees
         out_dir : str
-            Full path to the output directory (needed for template file generation)
+            Full path to the output directory (needed for template file
+            generation)
         ncpu : int, optional
             Number of CPUs to use (0 means all)
         """
@@ -226,8 +229,8 @@ class Screen(object):
         """
         Returns memory usage per time slot in GB
 
-        This method should be defined in the subclasses, but should conform to the inputs
-        below.
+        This method should be defined in the subclasses, but should conform to
+        the inputs below.
 
         Parameters
         ----------
@@ -262,8 +265,8 @@ class Screen(object):
         """
         self.ncpu = ncpu
 
-        # Identify any gaps in time (frequency gaps are not allowed), as we need to
-        # output a separate FITS file for each time chunk
+        # Identify any gaps in time (frequency gaps are not allowed), as we
+        # need to output a separate FITS file for each time chunk
         if len(self.times_ph) > 2:
             delta_times = (
                 self.times_ph[1:] - self.times_ph[:-1]
@@ -275,7 +278,8 @@ class Screen(object):
         else:
             gaps_ind = np.array([len(self.times_ph)])
 
-        # Add additional breaks to gaps_ind to keep memory usage within that available
+        # Add additional breaks to gaps_ind to keep memory usage within that
+        #  available
         if len(self.times_ph) > 2:
             available_mem_gb = cluster.get_available_memory()
             max_ntimes = max(
@@ -301,8 +305,8 @@ class Screen(object):
         # and [time, freq, ant, dir] for fast phases (scalarphase).
         # Output data are [RA, DEC, MATRIX, ANTENNA, FREQ, TIME].T
         # Loop over stations, frequencies, and times and fill in the correct
-        # matrix values (matrix dimension has 4 elements: real XX, imaginary XX,
-        # real YY and imaginary YY)
+        # matrix values (matrix dimension has 4 elements: real XX,
+        # imaginary XX, real YY and imaginary YY)
         outroot = self.name
         outfiles = []
         g_start = 0
@@ -336,9 +340,9 @@ class Screen(object):
                                 order=0,
                             )
 
-            # Ensure there are no NaNs in the images, as WSClean will produced uncorrected,
-            # uncleaned images if so. We replace NaNs with 1.0 and 0.0 for real and
-            # imaginary parts, respectively
+            # Ensure there are no NaNs in the images, as WSClean will produced
+            # uncorrected, uncleaned images if so. We replace NaNs with 1.0 and
+            # 0.0 for real and imaginary parts, respectively
             # Note: we iterate over time to reduce memory usage
             for t in range(ntimes):
                 for p in range(4):
@@ -446,10 +450,10 @@ class KLScreen(Screen):
         # ]
         # sourceTable = list(zip(*(soltab_ph.dir, vals)))
 
-        # Now call LoSoTo's stationscreen operation to do the fitting. For the phase
-        # screens, we reference the phases to the station with the least amount
-        # of flagged solutions, drawn from the first 10 stations (to ensure it is
-        # fairly central)
+        # Now call LoSoTo's stationscreen operation to do the fitting. For the
+        # phase screens, we reference the phases to the station with the least
+        # amount of flagged solutions, drawn from the first 10 stations (to
+        # ensure it is fairly central)
         ref_ind = misc.get_reference_station(soltab_ph, 10)
         adjust_order_amp = True
         screen_order_amp = min(
@@ -558,7 +562,8 @@ class KLScreen(Screen):
         ncpu,
     ):
         """
-        Makes the matrix of values for the given time, frequency, and station indices
+        Makes the matrix of values for the given time, frequency, and station
+        indices
 
         Parameters
         ----------
@@ -577,7 +582,8 @@ class KLScreen(Screen):
         ncpu : int, optional
             Number of CPUs to use (0 means all)
         """
-        # Use global variables to avoid serializing the arrays in the multiprocessing calls
+        # Use global variables to avoid serializing the arrays in the
+        # multiprocessing calls
         global screen_ph, screen_amp_xx, screen_amp_yy, pp, x, y, var_dict
 
         # Define various parameters
@@ -588,8 +594,8 @@ class KLScreen(Screen):
         r_0 = self.r_0
 
         # Make arrays of pixel coordinates for screen
-        # We need to convert the FITS cube pixel coords to screen pixel coords. The FITS cube
-        # has self.ra, self.dec at (xsize/2, ysize/2)
+        # We need to convert the FITS cube pixel coords to screen pixel coords.
+        # The FITS cube has self.ra, self.dec at (xsize/2, ysize/2)
         ximsize = int(np.ceil(self.width_ra / cellsize_deg))  # pix
         yimsize = int(np.ceil(self.width_dec / cellsize_deg))  # pix
         w = wcs.WCS(naxis=2)
@@ -615,7 +621,8 @@ class KLScreen(Screen):
         Nx = len(x)
         Ny = len(y)
 
-        # Select input data and reorder the axes to get axis order of [dir, time]
+        # Select input data and reorder the axes to get axis order of
+        # [dir, time]
         # Input data are [time, freq, ant, dir, pol] for slow amplitudes
         # and [time, freq, ant, dir] for fast phases (scalarphase).
         time_axis = 0
@@ -779,9 +786,10 @@ class VoronoiScreen(Screen):
             soltab_amp = solset.getSoltab(self.input_amplitude_soltab_name)
 
         # Input data are [time, freq, ant, dir, pol] for slow amplitudes
-        # and [time, freq, ant, dir] for fast phases (scalarphase). We reference
-        # the phases to the station with the least amount of flagged solutions,
-        # drawn from the first 10 stations (to ensure it is fairly central)
+        # and [time, freq, ant, dir] for fast phases (scalarphase).
+        # We reference the phases to the station with the least amount of
+        # flagged solutions, drawn from the first 10 stations
+        # (to ensure it is fairly central)
         self.vals_ph = soltab_ph.val
         ref_ind = misc.get_reference_station(soltab_ph, 10)
         vals_ph_ref = self.vals_ph[:, :, ref_ind, :].copy()
@@ -850,7 +858,8 @@ class VoronoiScreen(Screen):
         ncpu,
     ):
         """
-        Makes the matrix of values for the given time, frequency, and station indices
+        Makes the matrix of values for the given time, frequency, and station
+        indices
 
         Parameters
         ----------
@@ -869,7 +878,7 @@ class VoronoiScreen(Screen):
         ncpu : int, optional
             Number of CPUs to use (0 means all)
         """
-        # Make the template that converts polynomials to a rasterized 2-D image.
+        # Make the template that converts polynomials to a rasterized 2-D image
         # This only needs to be done once
         if self.data_rasertize_template is None:
             self.make_rasertize_template(cellsize_deg, out_dir)
@@ -948,9 +957,9 @@ class VoronoiScreen(Screen):
         RAind = w.axis_type_names.index("RA")
         Decind = w.axis_type_names.index("DEC")
 
-        # Get x, y coords for directions in pixels. We use the input calibration sky
-        # model for this, as the patch positions written to the h5parm file by DPPP may
-        # be different
+        # Get x, y coords for directions in pixels. We use the input
+        # calibration sky model for this, as the patch positions written to the
+        # h5parm file by DPPP may  be different
         skymod = lsmtool.load(self.input_skymodel_filename)
         source_dict = skymod.getPatchPositions()
         source_positions = []
@@ -995,7 +1004,8 @@ class VoronoiScreen(Screen):
         )
 
         if len(xy) == 1:
-            # If there is only a single direction, just make a single rectangular polygon
+            # If there is only a single direction, just make a single
+            # rectangular polygon
             box = [
                 field_minxy,
                 (field_minxy[0], field_maxxy[1]),
@@ -1068,7 +1078,7 @@ def init_worker(shared_val, val_shape):
     Initializer called when a child process is initialized, responsible
     for storing store shared_val and val_shape in var_dict (a global variable).
 
-    See https://research.wmz.ninja/articles/2018/03/on-sharing-large-arrays-when-using-pythons-multiprocessing.html
+    See https://research.wmz.ninja/articles/2018/03/on-sharing-large-arrays-when-using-pythons-multiprocessing.html # NOQA: E501
 
     Parameters
     ----------
@@ -1106,9 +1116,10 @@ def calculate_kl_screen(k, N_piercepoints, beta_val, r_0, screen_type):
     r_0 : float
         Scale size of phase fluctuations
     screen_type : string
-        Type of screen: 'ph' (phase), 'xx' (XX amplitude) or 'yy' (YY amplitude)
+        Type of screen: 'ph'(phase), 'xx'(XX amplitude) or 'yy'(YY amplitude)
     """
-    # Use global variables to avoid serializing the arrays in the multiprocessing calls
+    # Use global variables to avoid serializing the arrays in the
+    # multiprocessing calls
     global screen_ph, screen_amp_xx, screen_amp_yy, pp, x, y, var_dict
 
     tmp = np.frombuffer(var_dict["shared_val"], dtype=np.float64).reshape(

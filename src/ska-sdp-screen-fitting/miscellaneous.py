@@ -147,9 +147,9 @@ def make_template_image(
     if times is not None:
         ref_time = times[0]
         if ntimes > 1:
-            # Find CDELT as the smallest delta time, but ignore last delta, as it
-            # may be smaller due to the number of time slots not being a divisor of
-            # the solution interval
+            # Find CDELT as the smallest delta time, but ignore last delta, as
+            # it may be smaller due to the number of time slots not being a
+            # divisor of the solution interval
             deltas = times[1:] - times[:-1]
             if ntimes > 2:
                 del_time = np.min(deltas[:-1])
@@ -196,8 +196,8 @@ def rasterize(verts, data, blank_value=0):
     poly = Polygon(verts)
     prepared_polygon = prep(poly)
 
-    # Mask everything outside of the polygon plus its border (outline) with zeros
-    # (inside polygon plus border are ones)
+    # Mask everything outside of the polygon plus its border (outline) with
+    # zeros (inside polygon plus border are ones)
     mask = Image.new("L", (data.shape[0], data.shape[1]), 0)
     ImageDraw.Draw(mask).polygon(verts, outline=1, fill=1)
     data *= mask
@@ -313,9 +313,9 @@ def approx_equal(x, y, *args, **kwargs):
     if not (type(x) is type(y) is float):
         # Skip checking for __approx_equal__ in the common case of two floats.
         methodname = "__approx_equal__"
-        # Allow the objects to specify what they consider "approximately equal",
-        # giving precedence to x. If either object has the appropriate method, we
-        # pass on any optional arguments untouched.
+        # Allow the objects to specify what they consider "approximately
+        # equal", giving precedence to x. If either object has the appropriate
+        # method, we pass on any optional arguments untouched.
         for a, b in ((x, y), (y, x)):
             try:
                 method = getattr(a, methodname)
@@ -510,7 +510,8 @@ class multiprocManager(object):
         """
         Manager for multiprocessing
         procs: number of processors, if 0 use all available
-        funct: function to parallelize / note that the last parameter of this function must be the outQueue
+        funct: function to parallelize / note that the last parameter of this
+        function must be the outQueue
         and it will be linked to the output queue
         """
         if procs == 0:

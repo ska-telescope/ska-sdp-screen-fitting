@@ -33,10 +33,11 @@ def main(
     h5parmfile : str
         Filename of h5parm
     soltabname : str, optional
-        Name of soltab to use. If "gain" is in the name, phase and amplitudes are used
+        Name of soltab to use. If "gain" is in the name, phase and amplitudes
+        are used
     screen_type : str, optional
-        Kind of screen to use: 'tessellated' (simple Voronoi tessellation) or 'kl'
-        (Karhunen-Lo`eve transform)
+        Kind of screen to use: 'tessellated' (simple Voronoi tessellation)
+        or 'kl' (Karhunen-Lo`eve transform)
     outroot : str, optional
         Root of filename of output FITS file (root+'_0.fits')
     bounds_deg : list, optional
@@ -48,13 +49,15 @@ def main(
     solsetname : str, optional
         Name of solset
     padding_fraction : float, optional
-        Fraction of total size to pad with (e.g., 0.2 => 20% padding all around)
+        Fraction of total size to pad with (e.g., 0.2 => 20% padding all
+        around)
     cellsize_deg : float, optional
         Cellsize of output image
     smooth_deg : float, optional
         Size of smoothing kernel in degrees to apply
     interp_kind : str, optional
-        Kind of interpolation to use. Can be any supported by scipy.interpolate.interp1d
+        Kind of interpolation to use. Can be any supported by
+        scipy.interpolate.interp1d
     ncpu : int, optional
         Number of CPUs to use (0 means all)
 
@@ -98,8 +101,8 @@ def main(
         # No need to smooth KL screens
         smooth_pix = 0.0
 
-    # Check whether we just have one direction. If so, force screen_type to 'tessellated'
-    # as it can handle this case and KL screens can't
+    # Check whether we just have one direction. If so, force screen_type to
+    # 'tessellated' as it can handle this case and KL screens can't
     H = h5parm(h5parmfile)
     solset = H.getSolset(solsetname)
     soltab = solset.getSoltab(soltab_ph)

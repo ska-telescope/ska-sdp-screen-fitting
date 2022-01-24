@@ -595,8 +595,8 @@ def _process_station(
         If True, scale the screen order with sqrt of distance/scale_dist to the
         reference station
     scale_dist : float, optional
-        Distance used to normalize the distances used to scale the screen order.
-        If None, the max distance is used
+        Distance used to normalize the distances used to scale the screen
+        order. If None, the max distance is used
     adjust_order : bool, optional
         If True, adjust the screen order to obtain a reduced chi^2 of approx.
         unity
@@ -659,7 +659,8 @@ def _process_station(
                             # stop fitting if weights did not change
                             break
                         elif oindx == 0:
-                            # Skip the fit for first iteration, as it is the same as the prev one
+                            # Skip the fit for first iteration, as it is the
+                            # same as the prev one
                             skip_fit = True
                 if (
                     not np.all(station_weights[:, tindx] == 0.0)
@@ -751,7 +752,7 @@ def _process_single_freq(
     r_0,
     outQueue,
 ):
-    global r_full, weights_full, screen, residual, full_matrices, screen_order, pp
+    global r_full, weights_full, screen, residual, full_matrices, screen_order, pp  # NOQA: E501
 
     N_sources, N_stations, N_times, N_freqs, N_pols = screen.shape
     weights_out = np.zeros(weights_full[:, :, 0, :, :].shape)
@@ -821,11 +822,11 @@ def run(
     """
     Fits station screens to input soltab (type 'phase' or 'amplitude' only).
 
-    The results of the fit are stored in the soltab parent solset in "outsoltab"
-    and the residual values (actual - screen) are stored in "outsoltabresid".
-    These values are the screen amplitude values per station per pierce point
-    per solution interval. The pierce point locations are stored in an auxiliary
-    array in the output soltabs.
+    The results of the fit are stored in the soltab parent solset in
+    "outsoltab" and the residual values (actual - screen) are stored in
+    "outsoltabresid". These values are the screen amplitude values per station
+    per pierce point per solution interval. The pierce point locations are
+    stored in an auxiliary array in the output soltabs.
 
     Screens can be plotted with the PLOTSCREEN operation.
 
@@ -852,8 +853,8 @@ def run(
         If True, scale the screen order with sqrt of distance/scale_dist to the
         reference station
     scale_dist : float, optional
-        Distance used to normalize the distances used to scale the screen order.
-        If None, the max distance is used
+        Distance used to normalize the distances used to scale the screen
+        order. If None, the max distance is used
     adjust_order : bool, optional
         If True, adjust the screen order to obtain a reduced chi^2 of approx.
         unity
@@ -865,7 +866,7 @@ def run(
     """
     import numpy as np
 
-    global r_full, weights_full, screen, residual, full_matrices, screen_order, pp
+    global r_full, weights_full, screen, residual, full_matrices, screen_order, pp  # NOQA: E501
 
     # Get screen type
     screen_type = soltab.getType()
@@ -984,7 +985,8 @@ def run(
                 screen_order[s, :, freq_ind, pol_ind] = station_order[s]
     r_0 = 100
 
-    # Calculate full piercepoint arrays # maybe outdated, height not really used .. ?
+    # Calculate full piercepoint arrays # maybe outdated, height not really
+    # used .. ?
     # coordinate conversion RA-DEC to xy (image plane)
     pp, midRA, midDec = _calculate_piercepoints(
         np.array([station_positions[0]]), np.array(source_positions)
