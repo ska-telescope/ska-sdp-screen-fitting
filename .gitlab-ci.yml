@@ -8,10 +8,9 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-before_script:
-  - poetry config virtualenvs.create true
-
 stages:
+  before_script:
+    - poetry env use 3.8.1 
   - lint
   - build
   - test
