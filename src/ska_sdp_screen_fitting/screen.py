@@ -818,6 +818,7 @@ class VoronoiScreen(Screen):
         self.station_positions = []
         for station in self.station_names:
             self.station_positions.append(self.station_dict[station])
+        H.close()
 
     def get_memory_usage(self, cellsize_deg):
         """
