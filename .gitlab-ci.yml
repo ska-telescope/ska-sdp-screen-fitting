@@ -38,6 +38,7 @@ chiara-lint:
     - 'make help | grep python-lint'
     - 'echo "python-lint: installing tools"; time pip3 install poetry black isort pylint-junit'
     - poetry config virtualenvs.create true
+    - poetry env use 3.8.1
     - |
       if [[ -f pyproject.toml ]]; then
         echo "python-lint: Installing with poetry";
