@@ -1,11 +1,12 @@
 import os
 import shutil
+import sys
 import uuid
 
 import pytest
 
-# from subprocess import check_call
-
+sys.path.append("./src/ska_sdp_screen_fitting")
+from make_aterm_images import main  # noqa: E402
 
 """ Test screen functionality """
 
@@ -37,25 +38,26 @@ def test_fit_voronoi_screens():
     Tests Voronoi screens generation
     """
 
-    # outroot = "tessellated"
+    outroot = "tessellated"
+    main(
+        solfile,
+        "phase000",
+        "tessellated",
+        outroot,
+        [126.966898, 63.566717, 124.546030, 64.608827],
+        [125.779167, 64.092778],
+        sky,
+        "sol000",
+        1.4,
+        0.2,
+        0.1,
+        "nearest",
+        0,
+    )
 
-    # check_call(
-    #     [
-    #         "python",
-    #         "../src/ska-sdp-screen-fitting/make_aterm_images.py",
-    #         "--smooth_deg=0.1",
-    #         solfile,
-    #         f"--outroot={outroot}",
-    #         "--bounds_deg=[126.966898;63.566717;124.546030;64.608827]",
-    #         "--bounds_mid_deg=[125.779167;64.092778]",
-    #         f"--skymodel={sky}",
-    #     ]
-    # )
-
-    # assert os.path.isfile(f"{outroot}_0.fits")
-    # assert os.path.isfile(f"{outroot}_template.fits")
-    # assert os.path.isfile(f"{outroot}.txt")
-    assert True
+    assert os.path.isfile(f"{outroot}_0.fits")
+    assert os.path.isfile(f"{outroot}_template.fits")
+    assert os.path.isfile(f"{outroot}.txt")
 
 
 # def test_fit_kl_screens():
@@ -64,20 +66,9 @@ def test_fit_voronoi_screens():
 #     """
 
 #     outroot = "kl"
-#     check_call(
-#         [
-#             "python",
-#             "../src/ska-sdp-screen-fitting/make_aterm_images.py",
-#             "--smooth_deg=0.1",
-#             solfile,
-#             f"--outroot={outroot}",
-#             "--bounds_deg=[126.966898;63.566717;124.546030;64.608827]",
-#             "--bounds_mid_deg=[125.779167;64.092778]",
-#             "--screen_type=kl",
-#             "--soltabname=gain000",
-#             f"--skymodel={sky}",
-#         ]
-#     )
+#     main(solfile, "gain000", "kl",outroot,
+# [126.966898,63.566717,124.546030,64.608827],
+# [125.779167,64.092778], sky , "sol000", 1.4, 0.2,0.1, "nearest", 0)
 
 #     assert os.path.isfile(f"{outroot}_0.fits")
 #     assert os.path.isfile(f"{outroot}_template.fits")
