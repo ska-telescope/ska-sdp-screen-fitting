@@ -27,16 +27,16 @@ include:
     file: "gitlab-ci/includes/python.gitlab-ci.yml"
 
 
-python-lint:
-  image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
-  before_script:
-    - poetry config virtualenvs.create true
-    - poetry env use 3.8.1
+# python-lint:
+#   image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
+#   before_script:
+#     - poetry config virtualenvs.create true
+#     - poetry env use 3.8.1
 
 
-python-test:
-  image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
-  before_script:
-    - poetry config virtualenvs.create true
-    - poetry env use 3.8.1
+# python-test:
+#   image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
+#   before_script:
+#     - poetry config virtualenvs.create true
+#     - poetry env use 3.8.1
 
