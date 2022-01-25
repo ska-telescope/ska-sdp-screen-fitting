@@ -1,4 +1,4 @@
-image: $SKA_PYTHON_PYTANGO_BUILDER_IMAGE
+image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 
 default:
   tags:
@@ -29,7 +29,7 @@ cache:
 # Python lint stage template
 
 chiara-lint:
-  image: $SKA_PYTHON_PYTANGO_BUILDER_IMAGE
+  image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
   stage: lint
   tags:
     - k8srunner
