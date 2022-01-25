@@ -1,9 +1,11 @@
 import os
 import shutil
 import uuid
-from subprocess import check_call
 
 import pytest
+
+# from subprocess import check_call
+
 
 """ Test screen functionality """
 
@@ -35,7 +37,7 @@ def test_fit_voronoi_screens():
     Tests Voronoi screens generation
     """
 
-    outroot = "tessellated"
+    # outroot = "tessellated"
 
     # check_call(
     #     [
