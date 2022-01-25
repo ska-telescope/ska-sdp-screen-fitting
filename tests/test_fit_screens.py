@@ -60,7 +60,7 @@ def test_fit_voronoi_screens():
     assert os.path.isfile(f"{outroot}.txt")
 
 
-# test disabled because longer than timeout
+# # test disabled because longer than timeout
 # def test_fit_kl_screens():
 #     """
 #     Tests kl screens generation

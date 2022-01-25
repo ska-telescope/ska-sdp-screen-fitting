@@ -7,7 +7,8 @@ import os
 from argparse import RawTextHelpFormatter
 
 from h5parm import h5parm
-from screen import KLScreen, VoronoiScreen
+from kl_screen import KLScreen
+from voronoi_screen import VoronoiScreen
 
 
 def main(
