@@ -21,7 +21,40 @@ cache:
   paths:
     - .cache/pip
 
-include:
-  # Python
-  - project: "ska-telescope/templates-repository"
-    file: "gitlab-ci/includes/python.gitlab-ci.yml"
+# include:
+#   # Python
+#   - project: "ska-telescope/templates-repository"
+#     file: "gitlab-ci/includes/python.gitlab-ci.yml"
+
+# Python lint stage template
+
+chiara-lint:
+  image: $SKA_PYTHON_PYTANGO_BUILDER_IMAGE
+  stage: lint
+  tags:
+    - k8srunner
+  before_script:
+    - '[ -f .make/python.mk ] || (echo "File python.mk not included in Makefile"; exit 1;)'
+    - 'make help | grep python-lint'
+    - 'echo "python-lint: installing tools"; time pip3 install poetry black isort pylint-junit'
+    - poetry config virtualenvs.create true
+    - |
+      if [[ -f pyproject.toml ]]; then
+        echo "python-lint: Installing with poetry";
+        time poetry install --no-root;
+      else
+        if  [[ -f requirements.txt ]]; then
+          echo "python-lint: Installing with pip";
+          time pip3 install -r requirements.txt;
+        fi;
+      fi;
+  script:
+    - make python-lint;
+  artifacts:
+    paths:
+      - build/
+    when: always
+  rules:
+    - exists:
+        - pyproject.toml
+        - setup.py
