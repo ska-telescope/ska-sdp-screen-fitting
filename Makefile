@@ -1,5 +1,5 @@
 # Include Python support
-include .make/python.mk
+include .make/*.mk
 
 # Due to incompatibility, some checks are disabled -> will be fixed in Jira ticket ST-1102
 # E203 whitespace before ':', W503 line break before binary operator
