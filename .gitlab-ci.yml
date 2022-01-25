@@ -1,4 +1,4 @@
-image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
+image: $SKA_PYTHON_PYTANGO_BUILDER_IMAGE
 
 default:
   tags:
@@ -8,11 +8,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-before_script:
-  - poetry env use 3.8.1 
-
 stages:
-  - before_script
   - lint
   - build
   - test
