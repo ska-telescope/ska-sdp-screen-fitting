@@ -6,7 +6,7 @@ import uuid
 import pytest
 
 sys.path.append("./src/ska_sdp_screen_fitting")
-from make_aterm_images import main  # noqa: E402
+from make_aterm_images import main
 
 """ Test screen functionality """
 
@@ -66,9 +66,21 @@ def test_fit_voronoi_screens():
 #     """
 
 #     outroot = "kl"
-#     main(solfile, "gain000", "kl",outroot,
-# [126.966898,63.566717,124.546030,64.608827],
-# [125.779167,64.092778], sky , "sol000", 1.4, 0.2,0.1, "nearest", 0)
+#     main(
+#         solfile,
+#         "gain000",
+#         "kl",
+#         outroot,
+#         [126.966898, 63.566717, 124.546030, 64.608827],
+#         [125.779167, 64.092778],
+#         sky,
+#         "sol000",
+#         1.4,
+#         0.2,
+#         0.1,
+#         "nearest",
+#         0,
+#     )
 
 #     assert os.path.isfile(f"{outroot}_0.fits")
 #     assert os.path.isfile(f"{outroot}_template.fits")
