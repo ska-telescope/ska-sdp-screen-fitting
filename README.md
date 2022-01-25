@@ -1,19 +1,16 @@
-# Ska Sdp Screen Fitting
-
-
-## Screen fitting
+# Screen Fitting
 
 ## Description
 This module can be used to convert a direction dependent calibration file (in h5 format) into a set of screens (image cube in fits format).
 The input calibration file has one solution per baseline, frequency and solution interval; the output has instead one screen per baseline, frequency and solution interval. 
 There are two algotihms available for screen fitting:
 - Voronoi
-- Karuhnen Loeve
+- Karhunen Loeve
 
 Refer to https://wsclean.readthedocs.io/en/latest/a_term_correction.html?highlight=screen in the section "Diagonal gain correction" for more details.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+<!-- ## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge. -->
 
 ## Visuals
 The gif below shows the output of the KL (left) and Voronoi (right) screen-fitting algorithm for a fixed station and solution interval, varying in frequency. 
@@ -23,7 +20,7 @@ The gif below shows the output of the KL (left) and Voronoi (right) screen-fitti
 <img src="resources/kl_screen_fitting.gif" width="400" height="400" />
 <img src="resources/voronoi_screen_fitting.gif" width="400" height="400" />
 
-## Installation
+<!-- ## Installation
 Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
 ## Usage 
@@ -49,5 +46,5 @@ Show your appreciation to those who have contributed to the project.
 For open source projects, say how it is licensed.
 
 ## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers. -->
 
