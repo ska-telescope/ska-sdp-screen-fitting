@@ -4,9 +4,9 @@
 # This is the station-screen operation for LoSoTo
 
 import numpy as np
+import reweight
 from _logging import logger as logging
 from lib_operations import multiprocManager, normalize_phase
-import reweight
 
 logging.debug("Loading STATIONSCREEN module.")
 
