@@ -6,7 +6,7 @@ import uuid
 import pytest
 
 sys.path.append("./src/ska_sdp_screen_fitting")
-from make_aterm_images import main
+from make_aterm_images import main  # NOQA: E402
 
 """ Test screen functionality """
 

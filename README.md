@@ -2,11 +2,12 @@
 
 ## Description
 This module can be used to convert a direction dependent calibration file (in h5 format) into a set of screens (image cube in fits format).
-The input calibration file has one solution per baseline, frequency and solution interval; the output has instead one screen per baseline, frequency and solution interval. 
+The input calibration file has one solution per antenna, frequency and solution interval; the output has instead one screen per antenna, frequency and solution interval. 
 There are two algotihms available for screen fitting:
 - Voronoi
 - Karhunen Loeve
 
+The screens obtained can be used to apply direction dependent effects during the imaging process with IDG in WSClean. 
 Refer to https://wsclean.readthedocs.io/en/latest/a_term_correction.html?highlight=screen in the section "Diagonal gain correction" for more details.
 
 <!-- ## Badges
@@ -25,12 +26,6 @@ Within a particular ecosystem, there may be a common way of installing things, s
 
 ## Usage 
 Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
 
 ## Contributing
 State if you are open to contributions and what your requirements are for accepting them.
