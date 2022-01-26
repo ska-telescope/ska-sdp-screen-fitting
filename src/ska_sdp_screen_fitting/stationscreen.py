@@ -6,6 +6,7 @@
 import numpy as np
 from _logging import logger as logging
 from lib_operations import multiprocManager, normalize_phase
+import reweight
 
 logging.debug("Loading STATIONSCREEN module.")
 
@@ -314,7 +315,6 @@ def _flag_outliers(weights, residual, nsigma, screen_type):
 
     """
     import numpy as np
-    from reweight import _nancircstd
 
     # Find stddev of the screen
     flagged = np.where(weights == 0.0)
@@ -327,7 +327,7 @@ def _flag_outliers(weights, residual, nsigma, screen_type):
         residual = normalize_phase(residual)
         residual_nan = residual.copy()
         residual_nan[flagged] = np.nan
-        screen_stddev = _nancircstd(residual_nan, axis=0)
+        screen_stddev = reweight._nancircstd(residual_nan, axis=0)
     elif screen_type == "tec" or screen_type == "amplitude":
         # Use normal stddev
         screen_stddev = np.sqrt(
