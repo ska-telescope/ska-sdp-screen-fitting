@@ -8,12 +8,12 @@ import cluster
 import miscellaneous as misc
 import numpy as np
 import scipy.interpolate as si
-import scipy.ndimage as ndimage
 from astropy.coordinates import Angle
 from astropy.io import fits as pyfits
+from scipy import ndimage
 
 
-class Screen(object):
+class Screen:
     """
     Master class for a-term screens
 
@@ -22,10 +22,10 @@ class Screen(object):
     name : str
         Name of screen
     h5parm_filename : str
-        Filename of h5parm containing the input solutions
+        Filename of H5parm containing the input solutions
     skymodel_filename : str
         Filename of input sky model
-    ra : float
+    rad : float
         RA in degrees of screen center
     dec : float
         Dec in degrees of screen center
@@ -34,11 +34,11 @@ class Screen(object):
     width_dec : float
         Width of screen in Dec in degrees
     solset_name: str, optional
-        Name of solset of the input h5parm to use
+        Name of solset of the input H5parm to use
     phase_soltab_name: str, optional
-        Name of the phase soltab of the input h5parm to use
+        Name of the phase soltab of the input H5parm to use
     amplitude_soltab_name: str, optional
-        Name of amplitude soltab of the input h5parm to use
+        Name of amplitude soltab of the input H5parm to use
     """
 
     def __init__(
@@ -46,7 +46,7 @@ class Screen(object):
         name,
         h5parm_filename,
         skymodel_filename,
-        ra,
+        rad,
         dec,
         width_ra,
         width_dec,
@@ -55,7 +55,7 @@ class Screen(object):
         amplitude_soltab_name=None,
     ):
         self.name = name
-        self.log = logging.getLogger("rapthor:{}".format(self.name))
+        self.log = logging.getLogger(f"rapthor:{self.name}")
         self.input_h5parm_filename = h5parm_filename
         self.input_skymodel_filename = skymodel_filename
         self.input_solset_name = solset_name
@@ -65,11 +65,11 @@ class Screen(object):
             self.phase_only = False
         else:
             self.phase_only = True
-        if type(ra) is str:
-            ra = Angle(ra).to("deg").value
-        if type(dec) is str:
+        if isinstance(rad, str):
+            rad = Angle(rad).to("deg").value
+        if isinstance(dec, str):
             dec = Angle(dec).to("deg").value
-        self.ra = ra
+        self.rad = rad
         self.dec = dec
         width = max(
             width_ra, width_dec
@@ -86,7 +86,6 @@ class Screen(object):
 
         This method should be defined in the subclasses
         """
-        pass
 
     def interpolate(self, interp_kind="nearest"):
         """
@@ -114,23 +113,23 @@ class Screen(object):
             else:
                 logvals = self.vals_amp
             if self.vals_amp.shape[0] != self.vals_ph.shape[0]:
-                f = si.interp1d(
+                func = si.interp1d(
                     self.times_amp,
                     logvals,
                     axis=0,
                     kind=interp_kind,
                     fill_value="extrapolate",
                 )
-                logvals = f(self.times_ph)
+                logvals = func(self.times_ph)
             if self.vals_amp.shape[1] != self.vals_ph.shape[1]:
-                f = si.interp1d(
+                func = si.interp1d(
                     self.freqs_amp,
                     logvals,
                     axis=1,
                     kind=interp_kind,
                     fill_value="extrapolate",
                 )
-                logvals = f(self.freqs_ph)
+                logvals = func(self.freqs_ph)
             if not self.log_amps:
                 self.vals_amp = 10 ** (logvals)
             else:
@@ -164,7 +163,7 @@ class Screen(object):
         yimsize = int(np.ceil(self.width_dec / cellsize_deg))  # pix
         misc.make_template_image(
             outfile,
-            self.ra,
+            self.rad,
             self.dec,
             ximsize=ximsize,
             yimsize=yimsize,
@@ -212,7 +211,6 @@ class Screen(object):
         ncpu : int, optional
             Number of CPUs to use (0 means all)
         """
-        pass
 
     def get_memory_usage(self, cellsize_deg):
         """
@@ -226,14 +224,12 @@ class Screen(object):
         cellsize_deg : float
             Size of one pixel in degrees
         """
-        pass
 
     def write(
         self,
         out_dir,
         cellsize_deg,
         smooth_pix=0,
-        interp_kind="nearest",
         ncpu=0,
     ):
         """
@@ -247,8 +243,6 @@ class Screen(object):
             Size of one pixel in degrees
         smooth_pix : int, optional
             Size of Gaussian in pixels to smooth with
-        interp_kind : str, optional
-            Kind of interpolation to use
         ncpu : int, optional
             Number of CPUs to use (0 means all)
         """
@@ -301,20 +295,24 @@ class Screen(object):
         g_start = 0
         for gnum, g_stop in enumerate(gaps_ind):
             ntimes = g_stop - g_start
-            outfile = os.path.join(
-                out_dir, "{0}_{1}.fits".format(outroot, gnum)
-            )
+            outfile = os.path.join(out_dir, f"{outroot}_{gnum}.fits")
             hdu = self.make_fits_file(
                 outfile, cellsize_deg, g_start, g_stop, aterm_type="gain"
             )
             data = hdu[0].data
-            for f, freq in enumerate(self.freqs_ph):
-                for s, stat in enumerate(self.station_names):
-                    data[:, f, s, :, :, :] = self.make_matrix(
+            for freq_, _ in enumerate(self.freqs_ph):
+                for station, _ in enumerate(self.station_names):
+                    print(
+                        "Writing freq: "
+                        + str(freq_)
+                        + ", station: "
+                        + str(station)
+                    )
+                    data[:, freq_, station, :, :, :] = self.make_matrix(
                         g_start,
                         g_stop,
-                        f,
-                        s,
+                        freq_,
+                        station,
                         cellsize_deg,
                         out_dir,
                         self.ncpu,
@@ -322,9 +320,11 @@ class Screen(object):
 
                     # Smooth if desired
                     if smooth_pix > 0:
-                        for t in range(ntimes):
-                            data[t, f, s, :, :, :] = ndimage.gaussian_filter(
-                                data[t, f, s, :, :, :],
+                        for time in range(ntimes):
+                            data[
+                                time, freq_, station, :, :, :
+                            ] = ndimage.gaussian_filter(
+                                data[time, freq_, station, :, :, :],
                                 sigma=(0, smooth_pix, smooth_pix),
                                 order=0,
                             )
@@ -333,7 +333,7 @@ class Screen(object):
             # uncorrected, uncleaned images if so. We replace NaNs with 1.0 and
             # 0.0 for real and imaginary parts, respectively
             # Note: we iterate over time to reduce memory usage
-            for t in range(ntimes):
+            for time in range(ntimes):
                 for p in range(4):
                     if p % 2:
                         # Imaginary elements
@@ -341,8 +341,8 @@ class Screen(object):
                     else:
                         # Real elements
                         nanval = 1.0
-                    data[t, :, :, p, :, :][
-                        np.isnan(data[t, :, :, p, :, :])
+                    data[time, :, :, p, :, :][
+                        np.isnan(data[time, :, :, p, :, :])
                     ] = nanval
 
             # Write FITS file
@@ -356,9 +356,8 @@ class Screen(object):
             g_start = g_stop
 
         # Write list of filenames to a text file for later use
-        list_file = open(os.path.join(out_dir, "{0}.txt".format(outroot)), "w")
-        list_file.writelines([o + "\n" for o in outfiles])
-        list_file.close()
+        with open(os.path.join(out_dir, f"{outroot}.txt"), "w") as list_file:
+            list_file.writelines([o + "\n" for o in outfiles])
 
     def process(self, ncpu=0):
         """

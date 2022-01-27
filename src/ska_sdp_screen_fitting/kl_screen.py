@@ -1,3 +1,7 @@
+"""
+Class and helper functions for KL (Karhunen-Lo`eve) screens
+"""
+
 import itertools
 import multiprocessing
 from multiprocessing import Pool, RawArray
@@ -7,7 +11,7 @@ import miscellaneous as misc
 import numpy as np
 import stationscreen
 from astropy import wcs
-from h5parm import h5parm
+from h5parm import H5parm
 from screen import Screen
 
 
@@ -21,7 +25,7 @@ class KLScreen(Screen):
         name,
         h5parm_filename,
         skymodel_filename,
-        ra,
+        rad,
         dec,
         width_ra,
         width_dec,
@@ -33,7 +37,7 @@ class KLScreen(Screen):
             name,
             h5parm_filename,
             skymodel_filename,
-            ra,
+            rad,
             dec,
             width_ra,
             width_dec,
@@ -47,14 +51,14 @@ class KLScreen(Screen):
         Fits screens to the input solutions
         """
         # Open solution tables
-        H = h5parm(self.input_h5parm_filename, readonly=False)
-        solset = H.getSolset(self.input_solset_name)
-        soltab_ph = solset.getSoltab(self.input_phase_soltab_name)
+        H = H5parm(self.input_h5parm_filename, readonly=False)
+        solset = H.get_solset(self.input_solset_name)
+        soltab_ph = solset.get_soltab(self.input_phase_soltab_name)
         if not self.phase_only:
-            soltab_amp = solset.getSoltab(self.input_amplitude_soltab_name)
+            soltab_amp = solset.get_soltab(self.input_amplitude_soltab_name)
 
         # Set the position of the calibration patches to those of
-        # the input sky model, as the patch positions written to the h5parm
+        # the input sky model, as the patch positions written to the H5parm
         # file by DPPP may be different
         skymod = lsmtool.load(self.input_skymodel_filename)
         source_dict = skymod.getPatchPositions()
@@ -67,8 +71,8 @@ class KLScreen(Screen):
         # dec_deg = source_positions.T[1]
         # sourceTable = solset.obj._f_get_child("source")
         # vals = [
-        #     [ra * np.pi / 180.0, dec * np.pi / 180.0]
-        #     for ra, dec in zip(ra_deg, dec_deg)
+        #     [rad * np.pi / 180.0, dec * np.pi / 180.0]
+        #     for rad, dec in zip(ra_deg, dec_deg)
         # ]
         # sourceTable = list(zip(*(soltab_ph.dir, vals)))
 
@@ -89,12 +93,12 @@ class KLScreen(Screen):
             soltab_ph,
             "phase_screen000",
             order=screen_order,
-            refAnt=ref_ind,
+            ref_ant=ref_ind,
             scale_order=True,
             adjust_order=adjust_order_ph,
             ncpu=self.ncpu,
         )
-        soltab_ph_screen = solset.getSoltab("phase_screen000")
+        soltab_ph_screen = solset.get_soltab("phase_screen000")
         if not self.phase_only:
             misc.remove_soltabs(solset, "amplitude_screen000")
             misc.remove_soltabs(solset, "amplitude_screen000resid")
@@ -107,7 +111,7 @@ class KLScreen(Screen):
                 adjust_order=adjust_order_amp,
                 ncpu=self.ncpu,
             )
-            soltab_amp_screen = solset.getSoltab("amplitude_screen000")
+            soltab_amp_screen = solset.get_soltab("amplitude_screen000")
         else:
             soltab_amp_screen = None
 
@@ -121,21 +125,21 @@ class KLScreen(Screen):
             self.times_amp = soltab_amp_screen.time
             self.freqs_amp = soltab_amp_screen.freq
         self.source_names = soltab_ph_screen.dir
-        self.source_dict = solset.getSou()
+        self.source_dict = solset.get_source()
         self.source_positions = []
         for source in self.source_names:
             self.source_positions.append(self.source_dict[source])
         self.station_names = soltab_ph_screen.ant
-        self.station_dict = solset.getAnt()
+        self.station_dict = solset.get_ant()
         self.station_positions = []
         for station in self.station_names:
             self.station_positions.append(self.station_dict[station])
         self.height = soltab_ph_screen.obj._v_attrs["height"]
         self.beta_val = soltab_ph_screen.obj._v_attrs["beta"]
         self.r_0 = soltab_ph_screen.obj._v_attrs["r_0"]
-        self.pp = np.array(soltab_ph_screen.obj.piercepoint)
-        self.midRA = soltab_ph_screen.obj._v_attrs["midra"]
-        self.midDec = soltab_ph_screen.obj._v_attrs["middec"]
+        self.piercepoints = np.array(soltab_ph_screen.obj.piercepoint)
+        self.mid_ra = soltab_ph_screen.obj._v_attrs["midra"]
+        self.mid_dec = soltab_ph_screen.obj._v_attrs["middec"]
         H.close()
 
     def get_memory_usage(self, cellsize_deg):
@@ -180,7 +184,7 @@ class KLScreen(Screen):
         freq_ind,
         stat_ind,
         cellsize_deg,
-        out_dir,
+        _,
         ncpu,
     ):
         """
@@ -206,42 +210,43 @@ class KLScreen(Screen):
         """
         # Use global variables to avoid serializing the arrays in the
         # multiprocessing calls
-        global screen_ph, screen_amp_xx, screen_amp_yy, pp, x, y, var_dict
+        global SCREEN_PH, SCREEN_AMP_XX, SCREEN_AMP_YY, PIERCEPOINTS, X_COORD
+        global Y_COORD, VAR_DICT
 
         # Define various parameters
-        N_sources = len(self.source_names)
-        N_times = t_stop_index - t_start_index
-        N_piercepoints = N_sources
+        n_sources = len(self.source_names)
+        n_times = t_stop_index - t_start_index
+        n_piercepoints = n_sources
         beta_val = self.beta_val
         r_0 = self.r_0
 
         # Make arrays of pixel coordinates for screen
         # We need to convert the FITS cube pixel coords to screen pixel coords.
-        # The FITS cube has self.ra, self.dec at (xsize/2, ysize/2)
+        # The FITS cube has self.rad, self.dec at (xsize/2, ysize/2)
         ximsize = int(np.ceil(self.width_ra / cellsize_deg))  # pix
         yimsize = int(np.ceil(self.width_dec / cellsize_deg))  # pix
-        w = wcs.WCS(naxis=2)
-        w.wcs.crpix = [ximsize / 2.0, yimsize / 2.0]
-        w.wcs.cdelt = np.array([-cellsize_deg, cellsize_deg])
-        w.wcs.crval = [self.ra, self.dec]
-        w.wcs.ctype = ["RA---TAN", "DEC--TAN"]
-        w.wcs.set_pv([(2, 1, 45.0)])
+        wcs_obj = wcs.WCS(naxis=2)
+        wcs_obj.wcs.crpix = [ximsize / 2.0, yimsize / 2.0]
+        wcs_obj.wcs.cdelt = np.array([-cellsize_deg, cellsize_deg])
+        wcs_obj.wcs.crval = [self.rad, self.dec]
+        wcs_obj.wcs.ctype = ["RA---TAN", "DEC--TAN"]
+        wcs_obj.wcs.set_pv([(2, 1, 45.0)])
 
         x_fits = list(range(ximsize))
         y_fits = list(range(yimsize))
-        ra = []
+        rad = []
         dec = []
-        for xf, yf in zip(x_fits, y_fits):
-            x_y = np.array([[xf, yf]])
-            ra.append(w.wcs_pix2world(x_y, 0)[0][0])
-            dec.append(w.wcs_pix2world(x_y, 0)[0][1])
-        xy, _, _ = stationscreen._getxy(
-            ra, dec, midRA=self.midRA, midDec=self.midDec
+        for x_f, y_f in zip(x_fits, y_fits):
+            x_y = np.array([[x_f, y_f]])
+            rad.append(wcs_obj.wcs_pix2world(x_y, 0)[0][0])
+            dec.append(wcs_obj.wcs_pix2world(x_y, 0)[0][1])
+        x_y, _, _ = stationscreen._getxy(
+            rad, dec, mid_ra=self.mid_ra, mid_dec=self.mid_dec
         )
-        x = xy[0].T
-        y = xy[1].T
-        Nx = len(x)
-        Ny = len(y)
+        X_COORD = x_y[0].T
+        Y_COORD = x_y[1].T
+        len_x_coord = len(X_COORD)
+        len_y_coord = len(Y_COORD)
 
         # Select input data and reorder the axes to get axis order of
         # [dir, time]
@@ -249,31 +254,31 @@ class KLScreen(Screen):
         # and [time, freq, ant, dir] for fast phases (scalarphase).
         time_axis = 0
         dir_axis = 1
-        screen_ph = np.array(
+        SCREEN_PH = np.array(
             self.vals_ph[t_start_index:t_stop_index, freq_ind, stat_ind, :]
         )
-        screen_ph = screen_ph.transpose([dir_axis, time_axis])
+        SCREEN_PH = SCREEN_PH.transpose([dir_axis, time_axis])
         if not self.phase_only:
-            screen_amp_xx = np.array(
+            SCREEN_AMP_XX = np.array(
                 self.vals_amp[
                     t_start_index:t_stop_index, freq_ind, stat_ind, :, 0
                 ]
             )
-            screen_amp_xx = screen_amp_xx.transpose([dir_axis, time_axis])
-            screen_amp_yy = np.array(
+            SCREEN_AMP_XX = SCREEN_AMP_XX.transpose([dir_axis, time_axis])
+            SCREEN_AMP_YY = np.array(
                 self.vals_amp[
                     t_start_index:t_stop_index, freq_ind, stat_ind, :, 1
                 ]
             )
-            screen_amp_yy = screen_amp_yy.transpose([dir_axis, time_axis])
+            SCREEN_AMP_YY = SCREEN_AMP_YY.transpose([dir_axis, time_axis])
 
         # Process phase screens
         ncpu = self.ncpu
         if ncpu == 0:
             ncpu = multiprocessing.cpu_count()
-        pp = self.pp
-        val_shape = (Nx, Ny, N_times)
-        var_dict = {}
+        PIERCEPOINTS = self.piercepoints
+        val_shape = (len_x_coord, len_y_coord, n_times)
+        VAR_DICT = {}
         shared_val = RawArray(
             "d", int(val_shape[0] * val_shape[1] * val_shape[2])
         )
@@ -287,7 +292,7 @@ class KLScreen(Screen):
                 calculate_kl_screen_star,
                 zip(
                     range(val_shape[2]),
-                    itertools.repeat(N_piercepoints),
+                    itertools.repeat(n_piercepoints),
                     itertools.repeat(beta_val),
                     itertools.repeat(r_0),
                     itertools.repeat(screen_type),
@@ -312,7 +317,7 @@ class KLScreen(Screen):
                     calculate_kl_screen_star,
                     zip(
                         range(val_shape[2]),
-                        itertools.repeat(N_piercepoints),
+                        itertools.repeat(n_piercepoints),
                         itertools.repeat(beta_val),
                         itertools.repeat(r_0),
                         itertools.repeat(screen_type),
@@ -335,7 +340,7 @@ class KLScreen(Screen):
                     calculate_kl_screen_star,
                     zip(
                         range(val_shape[2]),
-                        itertools.repeat(N_piercepoints),
+                        itertools.repeat(n_piercepoints),
                         itertools.repeat(beta_val),
                         itertools.repeat(r_0),
                         itertools.repeat(screen_type),
@@ -348,7 +353,7 @@ class KLScreen(Screen):
             )
 
         # Output data are [RA, DEC, MATRIX, ANTENNA, FREQ, TIME].T
-        data = np.zeros((N_times, 4, Ny, Nx))
+        data = np.zeros((n_times, 4, len_y_coord, len_x_coord))
         if self.phase_only:
             data[:, 0, :, :] = np.cos(val_phase.T)
             data[:, 2, :, :] = np.cos(val_phase.T)
@@ -366,9 +371,9 @@ class KLScreen(Screen):
 def init_worker(shared_val, val_shape):
     """
     Initializer called when a child process is initialized, responsible
-    for storing store shared_val and val_shape in var_dict (a global variable).
+    for storing store shared_val and val_shape in Var_dict (a global variable).
 
-    See https://research.wmz.ninja/articles/2018/03/on-sharing-large-arrays-when-using-pythons-multiprocessing.html # NOQA: E501
+    See https://research.wmz.ninja/articles/2018/03/on-sharing-large-arrays-when-using-pythons-multiprocessing.html # NOQA: E501 # pylint: disable=C0301
 
     Parameters
     ----------
@@ -377,10 +382,10 @@ def init_worker(shared_val, val_shape):
     val_shape : tuple
         Shape of shared_val array
     """
-    global var_dict
+    global VAR_DICT
 
-    var_dict["shared_val"] = shared_val
-    var_dict["val_shape"] = val_shape
+    VAR_DICT["shared_val"] = shared_val
+    VAR_DICT["val_shape"] = val_shape
 
 
 def calculate_kl_screen_star(inputs):
@@ -390,7 +395,7 @@ def calculate_kl_screen_star(inputs):
     return calculate_kl_screen(*inputs)
 
 
-def calculate_kl_screen(k, N_piercepoints, beta_val, r_0, screen_type):
+def calculate_kl_screen(k, n_piercepoints, beta_val, r_0, screen_type):
     """
     Calculates screen images
 
@@ -398,7 +403,7 @@ def calculate_kl_screen(k, N_piercepoints, beta_val, r_0, screen_type):
     ----------
     k : int
         Time index
-    N_piercepoints : int
+    n_piercepoints : int
         Number of pierce points
     beta_val : float
         Power-law index for phase structure function (5/3 =>
@@ -410,21 +415,22 @@ def calculate_kl_screen(k, N_piercepoints, beta_val, r_0, screen_type):
     """
     # Use global variables to avoid serializing the arrays in the
     # multiprocessing calls
-    global screen_ph, screen_amp_xx, screen_amp_yy, pp, x, y, var_dict
+    global SCREEN_PH, SCREEN_AMP_XX, SCREEN_AMP_YY, PIERCEPOINTS, X_COORD
+    global Y_COORD, VAR_DICT
 
-    tmp = np.frombuffer(var_dict["shared_val"], dtype=np.float64).reshape(
-        var_dict["val_shape"]
+    tmp = np.frombuffer(VAR_DICT["shared_val"], dtype=np.float64).reshape(
+        VAR_DICT["val_shape"]
     )
     if screen_type == "ph":
-        inscreen = screen_ph[:, k]
+        inscreen = SCREEN_PH[:, k]
     if screen_type == "xx":
-        inscreen = screen_amp_xx[:, k]
+        inscreen = SCREEN_AMP_XX[:, k]
     if screen_type == "yy":
-        inscreen = screen_amp_yy[:, k]
-    f = inscreen.reshape(N_piercepoints)
-    for i, xi in enumerate(x):
-        for j, yi in enumerate(y):
-            p = np.array([xi, yi, 0.0])
-            d2 = np.sum(np.square(pp - p), axis=1)
-            c = -((d2 / (r_0 ** 2)) ** (beta_val / 2.0)) / 2.0
+        inscreen = SCREEN_AMP_YY[:, k]
+    f = inscreen.reshape(n_piercepoints)
+    for i, x_i in enumerate(X_COORD):
+        for j, y_i in enumerate(Y_COORD):
+            p = np.array([x_i, y_i, 0.0])
+            d_square = np.sum(np.square(PIERCEPOINTS - p), axis=1)
+            c = -((d_square / (r_0 ** 2)) ** (beta_val / 2.0)) / 2.0
             tmp[i, j, k] = np.dot(c, f)

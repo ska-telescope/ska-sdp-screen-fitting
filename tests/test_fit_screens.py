@@ -1,3 +1,5 @@
+""" Test screen fitting functionality """
+
 import os
 import shutil
 import sys
@@ -6,24 +8,23 @@ import uuid
 import pytest
 
 sys.path.append("./src/ska_sdp_screen_fitting")
-from make_aterm_images import main  # NOQA: E402
-
-""" Test screen functionality """
+from make_aterm_images import main  # NOQA: E402, C0413
 
 CWD = os.getcwd()
-solfile = "solutions.h5"
-sky = "skymodel.txt"
+SOLFILE = "solutions.h5"
+SKYMODEL = "skymodel.txt"
 
 
 @pytest.fixture(autouse=True)
 def source_env():
+    """Create temporary folder for test"""
     os.chdir(CWD)
     tmpdir = str(uuid.uuid4())
     os.mkdir(tmpdir)
     os.chdir(tmpdir)
 
-    shutil.copyfile(f"../resources/{solfile}", solfile)
-    shutil.copyfile(f"../resources/{sky}", sky)
+    shutil.copyfile(f"../resources/{SOLFILE}", SOLFILE)
+    shutil.copyfile(f"../resources/{SKYMODEL}", SKYMODEL)
 
     # Tests are executed here
     yield
@@ -40,18 +41,17 @@ def test_fit_voronoi_screens():
 
     outroot = "tessellated"
     main(
-        solfile,
+        SOLFILE,
         "phase000",
         "tessellated",
         outroot,
         [126.966898, 63.566717, 124.546030, 64.608827],
         [125.779167, 64.092778],
-        sky,
+        SKYMODEL,
         "sol000",
         1.4,
         0.2,
         0.1,
-        "nearest",
         0,
     )
 
@@ -67,18 +67,17 @@ def test_fit_kl_screens():
 
     outroot = "kl"
     main(
-        solfile,
+        SOLFILE,
         "gain000",
         "kl",
         outroot,
         [126.966898, 63.566717, 124.546030, 64.608827],
         [125.779167, 64.092778],
-        sky,
+        SKYMODEL,
         "sol000",
         1.4,
         0.2,
         0.1,
-        "nearest",
         0,
     )
 

@@ -1,3 +1,7 @@
+"""
+Contains class for Voronoi screens
+"""
+
 import os
 
 import lsmtool
@@ -7,7 +11,7 @@ import scipy.interpolate as si
 import shapely.geometry
 import shapely.ops
 from astropy import wcs
-from h5parm import h5parm
+from h5parm import H5parm
 from scipy.spatial import Voronoi
 from screen import Screen
 from shapely.geometry import Point
@@ -23,7 +27,7 @@ class VoronoiScreen(Screen):
         name,
         h5parm_filename,
         skymodel_filename,
-        ra,
+        rad,
         dec,
         width_ra,
         width_dec,
@@ -35,7 +39,7 @@ class VoronoiScreen(Screen):
             name,
             h5parm_filename,
             skymodel_filename,
-            ra,
+            rad,
             dec,
             width_ra,
             width_dec,
@@ -51,11 +55,11 @@ class VoronoiScreen(Screen):
         referencing the phases to a single station
         """
         # Open solution tables
-        H = h5parm(self.input_h5parm_filename)
-        solset = H.getSolset(self.input_solset_name)
-        soltab_ph = solset.getSoltab(self.input_phase_soltab_name)
+        H = H5parm(self.input_h5parm_filename)
+        solset = H.get_solset(self.input_solset_name)
+        soltab_ph = solset.get_soltab(self.input_phase_soltab_name)
         if not self.phase_only:
-            soltab_amp = solset.getSoltab(self.input_amplitude_soltab_name)
+            soltab_amp = solset.get_soltab(self.input_amplitude_soltab_name)
 
         # Input data are [time, freq, ant, dir, pol] for slow amplitudes
         # and [time, freq, ant, dir] for fast phases (scalarphase).
@@ -81,12 +85,12 @@ class VoronoiScreen(Screen):
             self.freqs_amp = self.freqs_ph
 
         self.source_names = soltab_ph.dir
-        self.source_dict = solset.getSou()
+        self.source_dict = solset.get_source()
         self.source_positions = []
         for source in self.source_names:
             self.source_positions.append(self.source_dict[source])
         self.station_names = soltab_ph.ant
-        self.station_dict = solset.getAnt()
+        self.station_dict = solset.get_ant()
         self.station_positions = []
         for station in self.station_names:
             self.station_positions.append(self.station_dict[station])
@@ -128,7 +132,7 @@ class VoronoiScreen(Screen):
         stat_ind,
         cellsize_deg,
         out_dir,
-        ncpu,
+        _,
     ):
         """
         Makes the matrix of values for the given time, frequency, and station
@@ -165,7 +169,7 @@ class VoronoiScreen(Screen):
                 self.data_rasertize_template.shape[1],
             )
         )
-        for p, poly in enumerate(self.polygons):
+        for _, poly in enumerate(self.polygons):
             ind = np.where(self.data_rasertize_template == poly.index + 1)
             if not self.phase_only:
                 val_amp_xx = self.vals_amp[
@@ -224,13 +228,13 @@ class VoronoiScreen(Screen):
             temp_image, cellsize_deg, 0, 1, aterm_type="gain"
         )
         data = hdu[0].data
-        w = wcs.WCS(hdu[0].header)
-        RAind = w.axis_type_names.index("RA")
-        Decind = w.axis_type_names.index("DEC")
+        wcs_obj = wcs.WCS(hdu[0].header)
+        ra_ind = wcs_obj.axis_type_names.index("RA")
+        dec_ind = wcs_obj.axis_type_names.index("DEC")
 
         # Get x, y coords for directions in pixels. We use the input
         # calibration sky model for this, as the patch positions written to the
-        # h5parm file by DPPP may  be different
+        # H5parm file by DPPP may  be different
         skymod = lsmtool.load(self.input_skymodel_filename)
         source_dict = skymod.getPatchPositions()
         source_positions = []
@@ -241,40 +245,40 @@ class VoronoiScreen(Screen):
         ra_deg = source_positions.T[0]
         dec_deg = source_positions.T[1]
 
-        xy = []
-        for RAvert, Decvert in zip(ra_deg, dec_deg):
+        xy_coord = []
+        for ra_vert, dec_vert in zip(ra_deg, dec_deg):
             ra_dec = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
-            ra_dec[0][RAind] = RAvert
-            ra_dec[0][Decind] = Decvert
-            xy.append(
+            ra_dec[0][ra_ind] = ra_vert
+            ra_dec[0][dec_ind] = dec_vert
+            xy_coord.append(
                 (
-                    w.wcs_world2pix(ra_dec, 0)[0][RAind],
-                    w.wcs_world2pix(ra_dec, 0)[0][Decind],
+                    wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind],
+                    wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind],
                 )
             )
 
         # Get boundary of tessellation region in pixels
         bounds_deg = [
-            self.ra + self.width_ra / 2.0,
+            self.rad + self.width_ra / 2.0,
             self.dec - self.width_dec / 2.0,
-            self.ra - self.width_ra / 2.0,
+            self.rad - self.width_ra / 2.0,
             self.dec + self.width_dec / 2.0,
         ]
         ra_dec = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
-        ra_dec[0][RAind] = max(bounds_deg[0], np.max(ra_deg) + 0.1)
-        ra_dec[0][Decind] = min(bounds_deg[1], np.min(dec_deg) - 0.1)
+        ra_dec[0][ra_ind] = max(bounds_deg[0], np.max(ra_deg) + 0.1)
+        ra_dec[0][dec_ind] = min(bounds_deg[1], np.min(dec_deg) - 0.1)
         field_minxy = (
-            w.wcs_world2pix(ra_dec, 0)[0][RAind],
-            w.wcs_world2pix(ra_dec, 0)[0][Decind],
+            wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind],
+            wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind],
         )
-        ra_dec[0][RAind] = min(bounds_deg[2], np.min(ra_deg) - 0.1)
-        ra_dec[0][Decind] = max(bounds_deg[3], np.max(dec_deg) + 0.1)
+        ra_dec[0][ra_ind] = min(bounds_deg[2], np.min(ra_deg) - 0.1)
+        ra_dec[0][dec_ind] = max(bounds_deg[3], np.max(dec_deg) + 0.1)
         field_maxxy = (
-            w.wcs_world2pix(ra_dec, 0)[0][RAind],
-            w.wcs_world2pix(ra_dec, 0)[0][Decind],
+            wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind],
+            wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind],
         )
 
-        if len(xy) == 1:
+        if len(xy_coord) == 1:
             # If there is only a single direction, just make a single
             # rectangular polygon
             box = [
@@ -289,7 +293,7 @@ class VoronoiScreen(Screen):
             # For more than one direction, tessellate
             # Generate array of outer points used to constrain the facets
             nouter = 64
-            means = np.ones((nouter, 2)) * np.array(xy).mean(axis=0)
+            means = np.ones((nouter, 2)) * np.array(xy_coord).mean(axis=0)
             offsets = []
             angles = [np.pi / (nouter / 2.0) * i for i in range(0, nouter)]
             for ang in angles:
@@ -302,7 +306,7 @@ class VoronoiScreen(Screen):
             outer_box = means + scale_offsets
 
             # Tessellate and clip
-            points_all = np.vstack([xy, outer_box])
+            points_all = np.vstack([xy_coord, outer_box])
             vor = Voronoi(points_all)
             lines = [
                 shapely.geometry.LineString(vor.vertices[line])
@@ -312,7 +316,7 @@ class VoronoiScreen(Screen):
             polygons = [poly for poly in shapely.ops.polygonize(lines)]
 
         # Index polygons to directions
-        for i, xypos in enumerate(xy):
+        for i, xypos in enumerate(xy_coord):
             for poly in polygons:
                 if poly.contains(Point(xypos)):
                     poly.index = i
@@ -324,8 +328,8 @@ class VoronoiScreen(Screen):
         for poly in polygons:
             verts_xy = poly.exterior.xy
             verts = []
-            for x, y in zip(verts_xy[0], verts_xy[1]):
-                verts.append((x, y))
+            for x_coord, y_coord in zip(verts_xy[0], verts_xy[1]):
+                verts.append((x_coord, y_coord))
             poly_raster = misc.rasterize(verts, data_template.copy()) * (
                 poly.index + 1
             )

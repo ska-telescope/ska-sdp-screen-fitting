@@ -1,19 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""
+Reweight module
+"""
 
+import numpy as np
 from _logging import logger as logging
-from lib_operations import multiprocManager, normalize_phase
+from lib_operations import MultiprocManager, normalize_phase
 
 logging.debug("Loading REWEIGHT module.")
 
 
 def _run_parser(soltab, parser, step):
     mode = parser.getstr(step, "mode", "uniform")
-    weightVal = parser.getfloat(step, "weightVal", 1.0)
+    weight_val = parser.getfloat(step, "weight_val", 1.0)
     nmedian = parser.getint(step, "nmedian", 3)
     nstddev = parser.getint(step, "nstddev", 251)
-    soltabImport = parser.getstr(step, "soltabImport", "")
-    flagBad = parser.getbool(step, "flagBad", False)
+    soltab_import = parser.getstr(step, "soltab_import", "")
+    flag_bad = parser.getbool(step, "flag_bad", False)
     ncpu = parser.getint("_global", "ncpu", 0)
 
     parser.checkSpelling(
@@ -21,30 +23,53 @@ def _run_parser(soltab, parser, step):
         soltab,
         [
             "mode",
-            "weightVal",
+            "weight_val",
             "nmedian",
             "nstddev",
-            "soltabImport",
-            "flagBad",
+            "soltab_import",
+            "flag_bad",
         ],
     )
     return run(
-        soltab, mode, weightVal, nmedian, nstddev, soltabImport, flagBad, ncpu
+        soltab,
+        mode,
+        weight_val,
+        nmedian,
+        nstddev,
+        soltab_import,
+        flag_bad,
+        ncpu,
     )
 
 
-def _rolling_window_lastaxis(a, window):
-    """Directly taken from Erik Rigtorp's post to numpy-discussion.
-    <http://www.mail-archive.com/numpy-discussion@scipy.org/msg29450.html>"""
-    import numpy as np
+def _rolling_window_lastaxis(array, window):
+    """
+    Directly taken from Erik Rigtorp's post to numpy-discussion.
+    <http://www.mail-archive.com/numpy-discussion@scipy.org/msg29450.html>
+
+    Make an ndarray with a rolling window of the last dimension
+
+    Parameters
+    ----------
+    array : array_like
+        Array to add rolling window to
+    window : int
+        Size of rolling window
+
+    Returns
+    -------
+    Array that is a view of the original array with a added dimension
+    of size w.
+
+    """
 
     if window < 1:
         raise ValueError("`window` must be at least 1.")
-    if window > a.shape[-1]:
+    if window > array.shape[-1]:
         raise ValueError("`window` is too long.")
-    shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
-    strides = a.strides + (a.strides[-1],)
-    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+    shape = array.shape[:-1] + (array.shape[-1] - window + 1, window)
+    strides = array.strides + (array.strides[-1],)
+    return np.lib.stride_tricks.as_strided(array, shape=shape, strides=strides)
 
 
 def _nancircstd(samples, axis=None, is_phase=True):
@@ -69,20 +94,19 @@ def _nancircstd(samples, axis=None, is_phase=True):
     circstd : float
         Circular standard deviation.
     """
-    import numpy as np
 
     if is_phase:
-        x1 = np.sin(samples)
-        x2 = np.cos(samples)
+        x_1 = np.sin(samples)
+        x_2 = np.cos(samples)
     else:
-        x1 = samples
-        x2 = np.sqrt(1.0 - x1 ** 2)
-    R = np.hypot(np.nanmean(x1, axis=axis), np.nanmean(x2, axis=axis))
+        x_1 = samples
+        x_2 = np.sqrt(1.0 - x_1 ** 2)
+    R = np.hypot(np.nanmean(x_1, axis=axis), np.nanmean(x_2, axis=axis))
 
     return np.sqrt(-2 * np.log(R))
 
 
-def _estimate_weights_window(sindx, vals, nmedian, nstddev, stype, outQueue):
+def _estimate_weights_window(sindx, vals, nmedian, nstddev, stype, out_queue):
     """
     Set weights using a median-filter method
 
@@ -100,11 +124,10 @@ def _estimate_weights_window(sindx, vals, nmedian, nstddev, stype, outQueue):
         Type of values (e.g., 'phase')
 
     """
-    import numpy as np
 
     pad_width = [(0, 0)] * len(vals.shape)
     pad_width[-1] = (int((nmedian - 1) / 2), int((nmedian - 1) / 2))
-    if stype == "phase" or stype == "rotation":
+    if stype in ("phase", "rotation"):
         # Median smooth and subtract to de-trend
         if nmedian > 0:
             # Convert to real/imag
@@ -195,24 +218,24 @@ def _estimate_weights_window(sindx, vals, nmedian, nstddev, stype, outQueue):
         fudge_factor = 2.0  # factor to compensate for smoothing
     else:
         fudge_factor = 1.0
-    w = 1.0 / np.square(stddev * fudge_factor)
+    weight = 1.0 / np.square(stddev * fudge_factor)
 
     # Rescale to fit in float16
     float16max = 65504.0
-    if np.max(w) > float16max:
-        w *= float16max / np.max(w)
+    if np.max(weight) > float16max:
+        weight *= float16max / np.max(weight)
 
-    outQueue.put([sindx, w])
+    out_queue.put([sindx, weight])
 
 
 def run(
     soltab,
     mode="uniform",
-    weightVal=1.0,
+    weight_val=1.0,
     nmedian=3,
     nstddev=251,
-    soltabImport="",
-    flagBad=False,
+    soltab_import="",
+    flag_bad=False,
     ncpu=0,
 ):
     """
@@ -223,7 +246,7 @@ def run(
     mode : str, optional
         One of 'uniform' (single value), 'window' (sliding window in time), or
         'copy' (copy from another table), by default 'uniform'.
-    weightVal : float, optional
+    weight_val : float, optional
         Set weights to this values (0=flagged), by default 1.
     nmedian : odd int, optional
         Median window size in number of timeslots for 'window' mode.
@@ -233,44 +256,42 @@ def run(
     nstddev : odd int, optional
         Standard deviation window size in number of timeslots for 'window'
         mode, by default 251.
-    soltabImport : str, optional
+    soltab_import : str, optional
         Name of a soltab. Copy weights from this soltab (must have same
         axes shape), by default none.
-    flagBad : bool, optional
+    flag_bad : bool, optional
         Re-apply flags to bad values (1 for amp, 0 for other tables),
         by default False.
     """
 
-    import numpy as np
-
     logging.info("Reweighting soltab: " + soltab.name)
 
     if mode == "copy":
-        if soltabImport == "":
-            logging.error("In copy mode a soltabImport must be specified.")
+        if soltab_import == "":
+            logging.error("In copy mode a soltab_import must be specified.")
             return 1
         solset = soltab.getSolset()
-        soltabI = solset.getSoltab(soltabImport)
-        soltabI.selection = soltab.selection
+        soltab_i = solset.getSoltab(soltab_import)
+        soltab_i.selection = soltab.selection
 
         weights, axes = soltab.getValues(weight=True)
-        weightsI, axesI = soltabI.getValues(weight=True)
+        weights_i, axes_i = soltab_i.getValues(weight=True)
         if (
-            list(axes.keys()) != list(axesI.keys())
-            or weights.shape != weightsI.shape
+            list(axes.keys()) != list(axes_i.keys())
+            or weights.shape != weights_i.shape
         ):
             logging.error(
                 "Impossible to merge: two tables have with different axes"
                 " values."
             )
             return 1
-        weightsI[np.where(weights == 0)] = 0.0
-        soltab.setValues(weightsI, weight=True)
-        soltab.addHistory("WEIGHT imported from " + soltabI.name + ".")
+        weights_i[np.where(weights == 0)] = 0.0
+        soltab.setValues(weights_i, weight=True)
+        soltab.addHistory("WEIGHT imported from " + soltab_i.name + ".")
 
     elif mode == "uniform":
-        soltab.addHistory("REWEIGHTED to " + str(weightVal) + ".")
-        soltab.setValues(weightVal, weight=True)
+        soltab.addHistory("REWEIGHTED to " + str(weight_val) + ".")
+        soltab.setValues(weight_val, weight=True)
 
     elif mode == "window":
         if nmedian != 0 and nmedian % 2 == 0:
@@ -285,7 +306,7 @@ def run(
         vals = soltab.val[:].swapaxes(antindx, 0)
         if tindx == 0:
             tindx = antindx
-        mpm = multiprocManager(ncpu, _estimate_weights_window)
+        mpm = MultiprocManager(ncpu, _estimate_weights_window)
         for sindx, sval in enumerate(vals):
             if np.all(sval == 0.0) or np.all(np.isnan(sval)):
                 # skip reference station
@@ -311,7 +332,7 @@ def run(
         )
         soltab.setValues(weights, weight=True)
 
-    if flagBad:
+    if flag_bad:
         weights = soltab.getValues(weight=True, retAxesVals=False)
         vals = soltab.getValues(retAxesVals=False)
         if soltab.getType() == "amplitude":

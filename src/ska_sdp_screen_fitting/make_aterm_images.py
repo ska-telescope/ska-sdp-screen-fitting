@@ -6,7 +6,7 @@ import argparse
 import os
 from argparse import RawTextHelpFormatter
 
-from h5parm import h5parm
+from h5parm import H5parm
 from kl_screen import KLScreen
 from voronoi_screen import VoronoiScreen
 
@@ -23,7 +23,6 @@ def main(
     padding_fraction=1.4,
     cellsize_deg=0.2,
     smooth_deg=0,
-    interp_kind="nearest",
     ncpu=0,
 ):
     """
@@ -32,7 +31,7 @@ def main(
     Parameters
     ----------
     h5parmfile : str
-        Filename of h5parm
+        Filename of H5parm
     soltabname : str, optional
         Name of soltab to use. If "gain" is in the name, phase and amplitudes
         are used
@@ -104,13 +103,13 @@ def main(
 
     # Check whether we just have one direction. If so, force screen_type to
     # 'tessellated' as it can handle this case and KL screens can't
-    H = h5parm(h5parmfile)
-    solset = H.getSolset(solsetname)
-    soltab = solset.getSoltab(soltab_ph)
+    h5_file = H5parm(h5parmfile)
+    solset = h5_file.get_solset(solsetname)
+    soltab = solset.get_soltab(soltab_ph)
     source_names = soltab.dir[:]
     if len(source_names) == 1:
         screen_type = "tessellated"
-    H.close()
+    h5_file.close()
 
     # Fit screens and make a-term images
     width_deg = (
@@ -149,18 +148,17 @@ def main(
         outdir,
         cellsize_deg,
         smooth_pix=smooth_pix,
-        interp_kind=interp_kind,
         ncpu=ncpu,
     )
 
 
 if __name__ == "__main__":
-    descriptiontext = "Make a-term images from solutions.\n"
+    DESCRIPTION_TEXT = "Make a-term images from solutions.\n"
 
     parser = argparse.ArgumentParser(
-        description=descriptiontext, formatter_class=RawTextHelpFormatter
+        description=DESCRIPTION_TEXT, formatter_class=RawTextHelpFormatter
     )
-    parser.add_argument("h5parmfile", help="Filename of input h5parm")
+    parser.add_argument("h5parmfile", help="Filename of input H5parm")
     parser.add_argument(
         "--soltabname", help="Name of soltab", type=str, default="phase000"
     )

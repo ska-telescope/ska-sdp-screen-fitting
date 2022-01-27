@@ -1,3 +1,9 @@
+"""
+    Logging module.
+    This module generates logs
+"""
+
+
 import logging
 import os
 import sys
@@ -22,16 +28,15 @@ class _ColorStreamHandler(logging.StreamHandler):
     def _get_color(cls, level):
         if level >= logging.CRITICAL:
             return cls.CRITICAL
-        elif level >= logging.ERROR:
+        if level >= logging.ERROR:
             return cls.ERROR
-        elif level >= logging.WARNING:
+        if level >= logging.WARNING:
             return cls.WARNING
-        elif level >= logging.INFO:
+        if level >= logging.INFO:
             return cls.INFO
-        elif level >= logging.DEBUG:
+        if level >= logging.DEBUG:
             return cls.DEBUG
-        else:
-            return cls.DEFAULT
+        return cls.DEFAULT
 
     def __init__(self, stream=None):
         logging.StreamHandler.__init__(self, stream)
@@ -43,16 +48,22 @@ class _ColorStreamHandler(logging.StreamHandler):
 
 
 class Logger:
+    """
+    Logger class
+    """
+
     def __init__(self, level="info", logfile=None, log_dir=None):
 
         self.logfile = logfile
         self.log_dir = log_dir
         self.backup(logfile, log_dir)
-        self.set_logger(logfile, log_dir)
+        self.set_logger(logfile)
         self.set_level(level)
 
     def backup(self, logfile, log_dir):
-
+        """
+        Logger backup function
+        """
         if self.logfile is not None:
             # bkp old log dir
             if os.path.isdir(log_dir):
@@ -71,8 +82,10 @@ class Logger:
                 )
                 os.system("mv %s %s" % (logfile, logfile_old))
 
-    def set_logger(self, logfile, log_dir):
-
+    def set_logger(self, logfile):
+        """
+        Set logger
+        """
         self.logger = logging.getLogger("LoSoTo")
         formatter = logging.Formatter(
             "%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S"
@@ -80,18 +93,22 @@ class Logger:
 
         # create file handler which logs even debug messages
         if self.logfile is not None:
-            handlerFile = logging.FileHandler(logfile)
-            # handlerFile.setLevel(logging.DEBUG)
-            handlerFile.setFormatter(formatter)
-            self.logger.addHandler(handlerFile)
+            handler_file = logging.FileHandler(logfile)
+            # handler_file.setLevel(logging.DEBUG)
+            handler_file.setFormatter(formatter)
+            self.logger.addHandler(handler_file)
 
         # create console handler with a higher log level
-        handlerConsole = _ColorStreamHandler(stream=sys.stdout)
-        # handlerConsole.setLevel(logging.INFO)
-        handlerConsole.setFormatter(formatter)
-        self.logger.addHandler(handlerConsole)
+        handler_console = _ColorStreamHandler(stream=sys.stdout)
+        # handler_console.setLevel(logging.INFO)
+        handler_console.setFormatter(formatter)
+        self.logger.addHandler(handler_console)
 
     def set_level(self, level):
+        """
+        Set logger level
+        """
+
         if level == "warning":
             self.logger.setLevel(logging.WARNING)
         elif level == "info":

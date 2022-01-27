@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
-# Some utilities for operations
+"""
+Some utilities for operations
+"""
 
 import multiprocessing
 
@@ -8,59 +8,63 @@ import numpy as np
 from _logging import logger as logging
 
 
-class multiprocManager(object):
-    class multiThread(multiprocessing.Process):
+class MultiprocManager:
+    """
+    This class is a manager for multiprocessing=
+    """
+
+    class MultiThread(multiprocessing.Process):
         """
         This class is a working thread which load parameters from a queue and
         return in the output queue
         """
 
-        def __init__(self, inQueue, outQueue, funct):
+        def __init__(self, in_queue, out_queue, funct):
             multiprocessing.Process.__init__(self)
-            self.inQueue = inQueue
-            self.outQueue = outQueue
+            self.in_queue = in_queue
+            self.out_queue = out_queue
             self.funct = funct
 
         def run(self):
 
             while True:
-                parms = self.inQueue.get()
+                parms = self.in_queue.get()
 
                 # poison pill
                 if parms is None:
-                    self.inQueue.task_done()
+                    self.in_queue.task_done()
                     break
 
-                self.funct(*parms, outQueue=self.outQueue)
-                self.inQueue.task_done()
+                self.funct(*parms, out_queue=self.out_queue)
+                self.in_queue.task_done()
 
     def __init__(self, procs=0, funct=None):
         """
         Manager for multiprocessing
         procs: number of processors, if 0 use all available
         funct: function to parallelize / note that the last parameter of this
-        function must be the outQueue
+        function must be the out_queue
         and it will be linked to the output queue
         """
         if procs == 0:
             procs = multiprocessing.cpu_count()
         self.procs = procs
         self._threads = []
-        self.inQueue = multiprocessing.JoinableQueue()
-        self.outQueue = multiprocessing.Queue()
+        self.in_queue = multiprocessing.JoinableQueue()
+        self.out_queue = multiprocessing.Queue()
         self.runs = 0
 
         logging.debug("Spawning %i threads..." % self.procs)
-        for proc in range(self.procs):
-            t = self.multiThread(self.inQueue, self.outQueue, funct)
-            self._threads.append(t)
-            t.start()
+        for _ in range(self.procs):
+            thread = self.MultiThread(self.in_queue, self.out_queue, funct)
+            self._threads.append(thread)
+            thread.start()
 
     def put(self, args):
         """
         Parameters to give to the next jobs sent into queue
         """
-        self.inQueue.put(args)
+        self.in_queue.put(args)
         self.runs += 1
 
     def get(self):
@@ -69,54 +73,54 @@ class multiprocManager(object):
         """
         # NOTE: do not use queue.empty() check which is unreliable
         # https://docs.python.org/2/library/multiprocessing.html
-        for run in range(self.runs):
-            yield self.outQueue.get()
+        for _ in range(self.runs):
+            yield self.out_queue.get()
 
     def wait(self):
         """
         Send poison pills to jobs and wait for them to finish
         The join() should kill all the processes
         """
-        for t in self._threads:
-            self.inQueue.put(None)
+        for _ in self._threads:
+            self.in_queue.put(None)
 
         # wait for all jobs to finish
-        self.inQueue.join()
-        self.inQueue.close()
+        self.in_queue.join()
+        self.in_queue.close()
 
     def __del__(self):
-        for t in self._threads:
-            t.terminate()
-            del t
+        for thread in self._threads:
+            thread.terminate()
+            del thread
 
 
-def reorderAxes(a, oldAxes, newAxes):
+def reorder_axes(array, old_axes, new_axes):
     """
     Reorder axis of an array to match a new name pattern.
 
     Parameters
     ----------
-    a : np array
+    array : np array
         The array to transpose.
-    oldAxes : list of str
+    old_axes : list of str
         A list like ['time','freq','pol'].
         It can contain more axes than the new list, those are ignored.
         This is to pass to oldAxis the soltab.getAxesNames() directly even on
         an array from getValuesIter()
-    newAxes : list of str
+    new_axes : list of str
         A list like ['time','pol','freq'].
 
     Returns
     -------
     np array
-        With axis transposed to match the newAxes list.
+        With axis transposed to match the new_axes list.
     """
-    oldAxes = [ax for ax in oldAxes if ax in newAxes]
-    idx = [oldAxes.index(ax) for ax in newAxes]
-    return np.transpose(a, idx)
+    old_axes = [ax for ax in old_axes if ax in new_axes]
+    idx = [old_axes.index(ax) for ax in new_axes]
+    return np.transpose(array, idx)
 
 
-def removeKeys(dic, keys=[]):
+def remove_keys(dic, keys=[]):
     """
     Remove a list of keys from a dict and return a new one.
 
@@ -132,12 +136,12 @@ def removeKeys(dic, keys=[]):
     dict
         Dictionary with removed keys.
     """
-    dicCopy = dict(dic)
-    if type(keys) is str:
+    dic_copy = dict(dic)
+    if isinstance(keys, str):
         keys = [keys]
     for key in keys:
-        del dicCopy[key]
-    return dicCopy
+        del dic_copy[key]
+    return dic_copy
 
 
 def normalize_phase(phase):

@@ -114,8 +114,7 @@ def get_fast_solve_intervals(
     target_numchunks = np.ceil(cluster_parset["max_nodes"] / numobs)
     samples_per_chunk = int(np.ceil(numsamples / target_numchunks))
     samples_per_chunk -= samples_per_chunk % solint
-    if samples_per_chunk < solint:
-        samples_per_chunk = solint
+    samples_per_chunk = max(samples_per_chunk, solint)
 
     return samples_per_chunk, solint
 
@@ -246,7 +245,6 @@ def get_slow_solve_intervals(
     if mem_gb / gb_per_sol < 1.0:
         samples_per_chunk = samples_per_chunk * mem_gb / gb_per_sol
         samples_per_chunk = max(1, int(round(samples_per_chunk)))
-    if samples_per_chunk < target_freqstep:
-        samples_per_chunk = target_freqstep
+    samples_per_chunk = max(samples_per_chunk, target_freqstep)
 
     return samples_per_chunk, solint
