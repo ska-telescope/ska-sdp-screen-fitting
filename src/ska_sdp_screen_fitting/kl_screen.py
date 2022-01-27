@@ -373,7 +373,8 @@ def init_worker(shared_val, val_shape):
     Initializer called when a child process is initialized, responsible
     for storing store shared_val and val_shape in Var_dict (a global variable).
 
-    See https://research.wmz.ninja/articles/2018/03/on-sharing-large-arrays-when-using-pythons-multiprocessing.html # NOQA: E501 # pylint: disable=C0301
+    See https://research.wmz.ninja/articles/2018/03/on-sharing-large-arrays
+    -when-using-pythons-multiprocessing.html
 
     Parameters
     ----------
