@@ -42,11 +42,11 @@ make python-test
 You can also format the code with ```make python-format``` and check the linting with ```make python-lint```
 
 ## Usage 
-
-After running ```make python-build``` as specified in the above section, a .whl package will be available in the "dist" folder. You can install this package with ```pip install package_name.whl``` , replacing "package_name" with the actual name in your dist folder. 
+If you want to run this repository as a python package to import in your own project, you can use the .whl file. 
+After running ```make python-build``` as specified in the above section, a .whl file will be available in the "dist" folder. You can install this package with ```pip install package_name.whl``` , replacing "package_name" with the actual name in your dist folder. 
 
 ### Import as python package
-You will be able to import the package and used as in the example below.
+You will be able to import the package and used as in the example below (the files "solution.h5" and "skymodel.txt" can be found in the "resources" folder of the repository).
 ```
 from ska_sdp_screen_fitting.make_aterm_images import make_aterm_image
 make_aterm_image(
@@ -64,10 +64,9 @@ make_aterm_image(
     ncpu=0
 )
 ```
-where the files "solution.h5" and "skymodel.txt" can be found in the "resources" folder of the repository.
 
 ### Run as exectuable
-You can also use the "ska-sdp-screen-fitting" executable to run the screen fitting from the terminal as specified below.
+You can also use the "ska-sdp-screen-fitting" executable to run the screen fitting from the terminal as specified below (the files "solution.h5" and "skymodel.txt" can be found in the "resources" folder of the repository).
 ```
 ska-sdp-screen-fitting \
 "solutions.h5" \
@@ -83,7 +82,6 @@ ska-sdp-screen-fitting \
 --smooth_deg=0.1 \
 --ncpu=0
 ```
-where the files "solution.h5" and "skymodel.txt" can be found in the "resources" folder of the repository.
 
 ## Authors and acknowledgment
 TODO
