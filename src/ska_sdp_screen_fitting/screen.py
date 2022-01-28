@@ -4,13 +4,14 @@ Module that holds screen-related classes and functions
 import logging
 import os
 
-import cluster
-import miscellaneous as misc
 import numpy as np
 import scipy.interpolate as si
 from astropy.coordinates import Angle
 from astropy.io import fits as pyfits
 from scipy import ndimage
+
+import ska_sdp_screen_fitting.miscellaneous as misc
+from ska_sdp_screen_fitting import cluster
 
 
 class Screen:

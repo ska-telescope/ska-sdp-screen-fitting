@@ -5,16 +5,17 @@ Contains class for Voronoi screens
 import os
 
 import lsmtool
-import miscellaneous as misc
 import numpy as np
 import scipy.interpolate as si
 import shapely.geometry
 import shapely.ops
 from astropy import wcs
-from h5parm import H5parm
 from scipy.spatial import Voronoi
-from screen import Screen
 from shapely.geometry import Point
+
+import ska_sdp_screen_fitting.miscellaneous as misc
+from ska_sdp_screen_fitting.h5parm import H5parm
+from ska_sdp_screen_fitting.screen import Screen
 
 
 class VoronoiScreen(Screen):

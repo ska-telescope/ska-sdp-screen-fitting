@@ -8,11 +8,12 @@ import os
 import re
 import sys
 
-import _version
 import numpy as np
 import tables
-from _logging import logger as logging
-from lib_losoto import deprecated_alias
+
+from ska_sdp_screen_fitting import _version
+from ska_sdp_screen_fitting._logging import logger as logging
+from ska_sdp_screen_fitting.lib_losoto import deprecated_alias
 
 if sys.version_info > (3, 0):
     from itertools import zip_longest

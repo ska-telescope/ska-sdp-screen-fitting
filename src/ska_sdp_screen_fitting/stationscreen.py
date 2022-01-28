@@ -4,11 +4,15 @@ This is the station-screen operation for LoSoTo
 
 
 import numpy as np
-import reweight
-from _logging import logger as logging
 from astropy.wcs import WCS
-from lib_operations import MultiprocManager, normalize_phase
 from scipy.linalg import pinv, svd
+
+from ska_sdp_screen_fitting import reweight
+from ska_sdp_screen_fitting._logging import logger as logging
+from ska_sdp_screen_fitting.lib_operations import (
+    MultiprocManager,
+    normalize_phase,
+)
 
 logging.debug("Loading STATIONSCREEN module.")
 

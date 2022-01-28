@@ -5,7 +5,8 @@ Some utilities for operations
 import multiprocessing
 
 import numpy as np
-from _logging import logger as logging
+
+from ska_sdp_screen_fitting._logging import logger as logging
 
 
 class MultiprocManager:

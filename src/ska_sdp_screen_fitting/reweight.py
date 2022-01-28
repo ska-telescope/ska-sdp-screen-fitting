@@ -3,8 +3,12 @@ Reweight module
 """
 
 import numpy as np
-from _logging import logger as logging
-from lib_operations import MultiprocManager, normalize_phase
+
+from ska_sdp_screen_fitting._logging import logger as logging
+from ska_sdp_screen_fitting.lib_operations import (
+    MultiprocManager,
+    normalize_phase,
+)
 
 logging.debug("Loading REWEIGHT module.")
 
