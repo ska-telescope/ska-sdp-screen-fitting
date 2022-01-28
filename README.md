@@ -65,7 +65,7 @@ make_aterm_image(
 )
 ```
 
-### Run as exectuable
+### Run as executable
 You can also use the "ska-sdp-screen-fitting" executable to run the screen fitting from the terminal as specified below (the files "solution.h5" and "skymodel.txt" can be found in the "resources" folder of the repository).
 ```
 ska-sdp-screen-fitting \
