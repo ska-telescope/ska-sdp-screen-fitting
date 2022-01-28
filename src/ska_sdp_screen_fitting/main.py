@@ -8,6 +8,10 @@ from ska_sdp_screen_fitting.make_aterm_images import make_aterm_image
 
 
 def start():
+    """
+    This is the entry point for the executable
+    """
+
     DESCRIPTION_TEXT = "Make a-term images from solutions.\n"
 
     parser = argparse.ArgumentParser(
