@@ -20,10 +20,50 @@ The gif below shows the output of the KL (left) and Voronoi (right) screen-fitti
 <img src="resources/voronoi_screen_fitting.gif" width="400" height="400" />
 
 ## Installation
-TODO
+In order to clone and work with this repository, you need to have poetry installed. You can get it with:
+```curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - ```
+
+Clone the repository with its submodules
+``` 
+git clone --recursive https://gitlab.com/ska-telescope/sdp/ska-sdp-screen-fitting.git
+git submodule init
+git submodule update  
+cd ska-sdp-screen-fitting
+```
+
+Enter poetry virtual environment and build the project
+```
+poetry shell
+poetry build && poetry install
+```
+Now you can use the make instructions of the submodule and run (for example) the tests:
+```
+make python-build
+make python-test
+```
+You can also format the code with ```make python-format``` and check the linting with ```make python-lint```
 
 ## Usage 
-TODO
+After running ```make python-build``` as specified in the above section, a .whl package will be available in the "dist" folder. If you want to use this package in your repository, you can install this package with ```pip install package_name.whl``` , replacing "package_name" with the actual name in your dist folder. You will be able to import the package and used as in the example below.
+```
+from ska_sdp_screen_fitting.make_aterm_images import make_aterm_image
+make_aterm_image(
+    "solutions.h5",
+    soltabname="phase000",
+    screen_type="tessellated",
+    outroot="",
+    bounds_deg=[126.966898, 63.566717, 124.546030, 64.608827],
+    bounds_mid_deg=[125.779167, 64.092778],
+    skymodel="skymodel.txt",
+    solsetname="sol000",
+    padding_fraction=1.4,
+    cellsize_deg=0.2,
+    smooth_deg=0,
+    ncpu=0
+)
+```
+where the files "solution.h5" and "skymodel.txt" can be found in the "resources" folder of the repository.
+
 
 ## Authors and acknowledgment
 TODO
