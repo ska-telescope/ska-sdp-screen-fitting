@@ -81,6 +81,15 @@ class Screen:
             False  # sets whether amplitudes are log10 values or not
         )
 
+        # The following attributes are assigned in the KL and Voronoi classes
+        self.times_amp = None
+        self.times_ph = []
+        self.vals_amp = None
+        self.vals_ph = None
+        self.freqs_amp = None
+        self.freqs_ph = None
+        self.station_names = None
+
     def fit(self):
         """
         Fits screens to the input solutions
@@ -212,6 +221,20 @@ class Screen:
         ncpu : int, optional
             Number of CPUs to use (0 means all)
         """
+
+        # Dummy implementation to avoid pylint errors
+        del (
+            t_start_index,
+            t_stop_index,
+            freq_ind,
+            stat_ind,
+            cellsize_deg,
+            out_dir,
+            ncpu,
+        )
+        data = None
+        print(f"This function should never be entered in {self.name}")
+        return data
 
     def get_memory_usage(self, cellsize_deg):
         """

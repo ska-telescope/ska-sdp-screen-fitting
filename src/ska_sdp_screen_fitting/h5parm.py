@@ -796,12 +796,12 @@ class Solset:
             "ant" is 0.
         """
         if ant is None:
-            raise "Missing antenna name."
+            raise Exception("Missing antenna name.")
 
         ants = self.get_ant()
 
         if ant not in list(ants.keys()):
-            raise "Missing antenna %s in antenna table." % ant
+            raise Exception("Missing antenna %s in antenna table." % ant)
 
         return {
             a: np.sqrt(
