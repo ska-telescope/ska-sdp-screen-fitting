@@ -475,4 +475,4 @@ def remove_soltabs(solset, soltabnames):
             soltab = solset.getSoltab(soltabname)
             soltab.delete()
         except Exception:
-            print('Error: soltab "{}" could not be removed'.format(soltabname))
+            print(f'Error: soltab "{soltabname}" could not be removed')

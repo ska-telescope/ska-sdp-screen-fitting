@@ -71,7 +71,7 @@ class Logger:
                 log_dir_old = time.strftime(
                     log_dir + "_bkp_%Y-%m-%d_%H:%M", current_time
                 )
-                os.system("mv %s %s" % (log_dir, log_dir_old))
+                os.system(f"mv {log_dir} {log_dir_old}")
             os.makedirs(log_dir)
 
             # bkp old log file
@@ -80,7 +80,7 @@ class Logger:
                 logfile_old = time.strftime(
                     logfile + "_bkp_%Y-%m-%d_%H:%M", current_time
                 )
-                os.system("mv %s %s" % (logfile, logfile_old))
+                os.system(f"mv {logfile} {logfile_old}")
 
     def set_logger(self, logfile):
         """
@@ -116,7 +116,7 @@ class Logger:
         elif level == "debug":
             self.logger.setLevel(logging.DEBUG)
         else:
-            print("Debug level %s doesn't exist." % level)
+            print(f"Debug level {level} doesn't exist.")
 
 
 # this is used by all libraries for logging

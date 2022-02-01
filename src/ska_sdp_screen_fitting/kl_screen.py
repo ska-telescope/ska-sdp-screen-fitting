@@ -52,8 +52,8 @@ class KLScreen(Screen):
         Fits screens to the input solutions
         """
         # Open solution tables
-        H = H5parm(self.input_h5parm_filename, readonly=False)
-        solset = H.get_solset(self.input_solset_name)
+        h5_file = H5parm(self.input_h5parm_filename, readonly=False)
+        solset = h5_file.get_solset(self.input_solset_name)
         soltab_ph = solset.get_soltab(self.input_phase_soltab_name)
         if not self.phase_only:
             soltab_amp = solset.get_soltab(self.input_amplitude_soltab_name)
@@ -141,7 +141,7 @@ class KLScreen(Screen):
         self.piercepoints = np.array(soltab_ph_screen.obj.piercepoint)
         self.mid_ra = soltab_ph_screen.obj._v_attrs["midra"]
         self.mid_dec = soltab_ph_screen.obj._v_attrs["middec"]
-        H.close()
+        h5_file.close()
 
     def get_memory_usage(self, cellsize_deg):
         """
@@ -429,10 +429,10 @@ def calculate_kl_screen(k, n_piercepoints, beta_val, r_0, screen_type):
         inscreen = SCREEN_AMP_XX[:, k]
     if screen_type == "yy":
         inscreen = SCREEN_AMP_YY[:, k]
-    f = inscreen.reshape(n_piercepoints)
+    f_matrix = inscreen.reshape(n_piercepoints)
     for i, x_i in enumerate(X_COORD):
         for j, y_i in enumerate(Y_COORD):
-            p = np.array([x_i, y_i, 0.0])
-            d_square = np.sum(np.square(PIERCEPOINTS - p), axis=1)
-            c = -((d_square / (r_0 ** 2)) ** (beta_val / 2.0)) / 2.0
-            tmp[i, j, k] = np.dot(c, f)
+            p_array = np.array([x_i, y_i, 0.0])
+            d_square = np.sum(np.square(PIERCEPOINTS - p_array), axis=1)
+            c_matrix = -((d_square / (r_0 ** 2)) ** (beta_val / 2.0)) / 2.0
+            tmp[i, j, k] = np.dot(c_matrix, f_matrix)

@@ -55,7 +55,9 @@ class MultiprocManager:
         self.out_queue = multiprocessing.Queue()
         self.runs = 0
 
-        logging.debug("Spawning %i threads..." % self.procs)
+        logging.debug(
+            "Spawning %i threads..." % self.procs  # pylint: disable=C0209
+        )
         for _ in range(self.procs):
             thread = self.MultiThread(self.in_queue, self.out_queue, funct)
             self._threads.append(thread)

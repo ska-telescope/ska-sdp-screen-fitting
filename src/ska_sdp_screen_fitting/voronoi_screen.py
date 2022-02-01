@@ -10,7 +10,7 @@ import scipy.interpolate as si
 import shapely.geometry
 import shapely.ops
 from astropy import wcs
-from scipy.spatial import Voronoi
+from scipy.spatial import Voronoi  # pylint: disable=E0611
 from shapely.geometry import Point
 
 import ska_sdp_screen_fitting.miscellaneous as misc
@@ -56,8 +56,8 @@ class VoronoiScreen(Screen):
         referencing the phases to a single station
         """
         # Open solution tables
-        H = H5parm(self.input_h5parm_filename)
-        solset = H.get_solset(self.input_solset_name)
+        h5_file = H5parm(self.input_h5parm_filename)
+        solset = h5_file.get_solset(self.input_solset_name)
         soltab_ph = solset.get_soltab(self.input_phase_soltab_name)
         if not self.phase_only:
             soltab_amp = solset.get_soltab(self.input_amplitude_soltab_name)
@@ -95,7 +95,7 @@ class VoronoiScreen(Screen):
         self.station_positions = []
         for station in self.station_names:
             self.station_positions.append(self.station_dict[station])
-        H.close()
+        h5_file.close()
 
     def get_memory_usage(self, cellsize_deg):
         """
@@ -195,18 +195,18 @@ class VoronoiScreen(Screen):
             val_phase = self.vals_ph[
                 t_start_index:t_stop_index, freq_ind, stat_ind, poly.index
             ]
-            for t in range(t_stop_index - t_start_index):
-                data[t, 0, ind[0], ind[1]] = val_amp_xx[t] * np.cos(
-                    val_phase[t]
+            for time in range(t_stop_index - t_start_index):
+                data[time, 0, ind[0], ind[1]] = val_amp_xx[time] * np.cos(
+                    val_phase[time]
                 )
-                data[t, 2, ind[0], ind[1]] = val_amp_yy[t] * np.cos(
-                    val_phase[t]
+                data[time, 2, ind[0], ind[1]] = val_amp_yy[time] * np.cos(
+                    val_phase[time]
                 )
-                data[t, 1, ind[0], ind[1]] = val_amp_xx[t] * np.sin(
-                    val_phase[t]
+                data[time, 1, ind[0], ind[1]] = val_amp_xx[time] * np.sin(
+                    val_phase[time]
                 )
-                data[t, 3, ind[0], ind[1]] = val_amp_yy[t] * np.sin(
-                    val_phase[t]
+                data[time, 3, ind[0], ind[1]] = val_amp_yy[time] * np.sin(
+                    val_phase[time]
                 )
 
         return data
@@ -222,9 +222,7 @@ class VoronoiScreen(Screen):
         out_dir : str
             Full path to the output directory
         """
-        temp_image = os.path.join(
-            out_dir, "{}_template.fits".format(self.name)
-        )
+        temp_image = os.path.join(out_dir, f"{self.name}_template.fits")
         hdu = self.make_fits_file(
             temp_image, cellsize_deg, 0, 1, aterm_type="gain"
         )

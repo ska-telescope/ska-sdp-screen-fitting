@@ -1,3 +1,4 @@
+# pylint: disable=C0302
 """
     Module for retrieving and writing data in H5parm format
 """
@@ -262,8 +263,8 @@ class H5parm:
         for solset_name in self.get_solset_names():
             if re.match(r"^sol[0-9][0-9][0-9]$", solset_name):
                 nums.append(int(solset_name[-3:]))
-
-        return "sol%03d" % min(list(set(range(1000)) - set(nums)))
+        first_solset_idx = min(list(set(range(1000)) - set(nums)))
+        return f"sol{first_solset_idx:03d}"
 
     def print_info(self, filter=None, verbose=False):
         """
@@ -323,7 +324,7 @@ class H5parm:
                 lines.append(" ".join(line))
             return lines
 
-        info = "\nSummary of %s\n" % self.filename
+        info = f"\nSummary of {self.filename}\n"
         solsets = self.get_solsets()
 
         # Filter on solset name
@@ -348,7 +349,7 @@ class H5parm:
 
         # For each solution set, list solution tables, sources, and antennas
         for solset in solsets:
-            info += "\nSolution set '%s':\n" % solset.name
+            info += f"\nSolution set '{solset.name}':\n"
             info += "=" * len(solset.name) + "=" * 16 + "\n\n"
 
             # Add direction (source) names
@@ -392,9 +393,7 @@ class H5parm:
                             pls = "s"
                         else:
                             pls = ""
-                        axis_str_list.append(
-                            "%i %s%s" % (nslots, axis_name, pls)
-                        )
+                        axis_str_list.append(f"{nslots} {axis_name}{pls}")
                         if verbose:
                             file.write(axis_name + ": ")
                             vals = soltab.get_axis_values(axis_name)
@@ -402,37 +401,33 @@ class H5parm:
                             # important decimal values for time/freq
                             if axis_name == "freq":
                                 file.write(
-                                    " ".join(
-                                        ["{0:.8f}".format(v) for v in vals]
-                                    )
+                                    " ".join([f"{v:.8f}" for v in vals])
                                     + "\n\n"
                                 )
                             elif axis_name == "time":
                                 file.write(
-                                    " ".join(
-                                        ["{0:.7f}".format(v) for v in vals]
-                                    )
+                                    " ".join([f"{v:.7f}" for v in vals])
                                     + "\n\n"
                                 )
                             else:
                                 file.write(
-                                    " ".join(["{}".format(v) for v in vals])
-                                    + "\n\n"
+                                    " ".join([f"{v}" for v in vals]) + "\n\n"
                                 )
-                    info += "\nSolution table '%s' (type: %s): %s\n" % (
-                        soltab.name,
-                        soltab.get_type(),
-                        ", ".join(axis_str_list),
+                    axis_list_str = ", ".join(axis_str_list)
+                    info += (
+                        f"\nSolution table '{soltab.name}' (type: "
+                        f"{soltab.get_type()}): {axis_list_str}\n"
                     )
                     weights = soltab.get_values(
                         weight=True, ret_axes_vals=False
                     )
                     vals = soltab.get_values(weight=False, ret_axes_vals=False)
-                    info += "    Flagged data: %.3f%%\n" % (
+                    flagged_data_perc = (
                         100.0
                         * np.sum(weights == 0 | np.isnan(vals))
                         / len(weights.flat)
                     )
+                    info += f"    Flagged data: {flagged_data_perc:.3f}%\n"
 
                     # Add some extra attributes stored in screen-type tables
                     if soltab.get_type() == "screen":
@@ -443,8 +438,9 @@ class H5parm:
                                 if add_head:
                                     info += "    Screen attributes:\n"
                                     add_head = False
-                                info += "        {0}: {1}\n".format(
-                                    name, soltab.obj._v_attrs[name]
+                                info += (
+                                    f"        {name}: "
+                                    f"{soltab.obj._v_attrs[name]}\n"
                                 )
 
                     # Add history
@@ -454,8 +450,9 @@ class H5parm:
                         joinstr = "\n" + 13 * " "
                         info += joinstr.join(wrap(history)) + "\n"
                 except tables.exceptions.NoSuchNodeError:
-                    info += "\nSolution table '%s': No valid data found\n" % (
-                        soltab.name
+                    info += (
+                        f"\nSolution table '{soltab.name}': "
+                        "No valid data found\n"
                     )
 
             if verbose:
@@ -668,8 +665,8 @@ class Solset:
         for soltab in self.get_soltabs():
             if re.match(r"^" + soltype + "[0-9][0-9][0-9]$", soltab.name):
                 nums.append(int(soltab.name[-3:]))
-
-        return soltype + "%03d" % min(list(set(range(1000)) - set(nums)))
+        soltype_idx = min(list(set(range(1000)) - set(nums)))
+        return f"{soltype}{soltype_idx:03d}"
 
     def get_soltabs(self, use_cache=False, sel={}):
         """
@@ -800,8 +797,8 @@ class Solset:
 
         ants = self.get_ant()
 
-        if ant not in list(ants.keys()):
-            raise Exception("Missing antenna %s in antenna table." % ant)
+        if ant not in list(ants.keys()):  # pylint: disable=C0201
+            raise Exception(f"Missing antenna {ant} in antenna table.")
 
         return {
             a: np.sqrt(
@@ -1067,8 +1064,8 @@ class Soltab:
                     # speedup in the common case of a single value
                     if not sel_val[0] in self.get_axis_values(axis).tolist():
                         logging.error(
-                            "Cannot find value %s in axis %s. Skip selection."
-                            % (sel_val[0], axis)
+                            "Cannot find value %s"  # pylint: disable=C0209
+                            " in axis %s. Skip selection." % (sel_val[0], axis)
                         )
                         return
                     self.selection[idx] = [
@@ -1641,9 +1638,7 @@ class Soltab:
                 if ref_dir == "center":
                     # get the center (=closest to average) direction
                     dirs_dict = self.get_solset().get_source()
-                    mean_dir = np.mean(
-                        [dirs_dict[k] for k in dirs_dict], axis=0
-                    )
+                    mean_dir = np.mean([dirs_dict.items()], axis=0)
                     ref_dir, _ = min(
                         dirs_dict.items(),
                         key=lambda kd: np.linalg.norm(kd[1] - mean_dir),
@@ -1746,9 +1741,7 @@ class Soltab:
                 if ref_dir == "center":
                     # get the center (=closest to average) direction
                     dirs_dict = self.get_solset().get_source()
-                    mean_dir = np.mean(
-                        [dirs_dict[k] for k in dirs_dict], axis=0
-                    )
+                    mean_dir = np.mean([dirs_dict.items()], axis=0)
                     ref_dir, _ = min(
                         dirs_dict.items(),
                         key=lambda kd: np.linalg.norm(kd[1] - mean_dir),
@@ -1923,7 +1916,8 @@ class Soltab:
                     nums.append(int(attr[-3:]))
             except Exception:
                 pass
-        history_attr = "HISTORY%03d" % min(list(set(range(1000)) - set(nums)))
+        history_attr_str = min(list(set(range(1000)) - set(nums)))
+        history_attr = f"HISTORY{history_attr_str:03d}"
 
         if date:
             entry = current_time + ": " + str(entry)

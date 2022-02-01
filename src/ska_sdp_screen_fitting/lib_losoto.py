@@ -39,11 +39,8 @@ def rename_kwargs(func_name, kwargs, aliases):
     for alias, new in aliases.items():
         if alias in kwargs:
             if new in kwargs:
-                raise TypeError(
-                    "{} received both {} and {}".format(func_name, alias, new)
-                )
+                raise TypeError(f"{func_name} received both {alias} and {new}")
             warnings.warn(
-                "{} is deprecated; use {}".format(alias, new),
-                DeprecationWarning,
+                f"{alias} is deprecated; use {new}", DeprecationWarning
             )
             kwargs[new] = kwargs.pop(alias)

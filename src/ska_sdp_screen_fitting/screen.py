@@ -358,15 +358,15 @@ class Screen:
             # 0.0 for real and imaginary parts, respectively
             # Note: we iterate over time to reduce memory usage
             for time in range(ntimes):
-                for p in range(4):
-                    if p % 2:
+                for p_val in range(4):
+                    if p_val % 2:
                         # Imaginary elements
                         nanval = 0.0
                     else:
                         # Real elements
                         nanval = 1.0
-                    data[time, :, :, p, :, :][
-                        np.isnan(data[time, :, :, p, :, :])
+                    data[time, :, :, p_val, :, :][
+                        np.isnan(data[time, :, :, p_val, :, :])
                     ] = nanval
 
             # Write FITS file

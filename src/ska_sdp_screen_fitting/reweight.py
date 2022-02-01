@@ -105,9 +105,9 @@ def _nancircstd(samples, axis=None, is_phase=True):
     else:
         x_1 = samples
         x_2 = np.sqrt(1.0 - x_1 ** 2)
-    R = np.hypot(np.nanmean(x_1, axis=axis), np.nanmean(x_2, axis=axis))
+    r_val = np.hypot(np.nanmean(x_1, axis=axis), np.nanmean(x_2, axis=axis))
 
-    return np.sqrt(-2 * np.log(R))
+    return np.sqrt(-2 * np.log(r_val))
 
 
 def _estimate_weights_window(sindx, vals, nmedian, nstddev, stype, out_queue):
@@ -326,13 +326,13 @@ def run(
             )
         mpm.wait()
         weights = np.ones(vals.shape)
-        for (sindx, w) in mpm.get():
-            weights[sindx, :] = w.swapaxes(-1, tindx - 1)
+        for (sindx, w_val) in mpm.get():
+            weights[sindx, :] = w_val.swapaxes(-1, tindx - 1)
         weights = weights.swapaxes(0, antindx)
 
         soltab.addHistory(
-            "REWEIGHTED using sliding window with nmedian={0} "
-            "and nstddev={1} timeslots".format(nmedian, nstddev)
+            f"REWEIGHTED using sliding window with nmedian={nmedian} and "
+            f"nstddev={nstddev} timeslots"
         )
         soltab.setValues(weights, weight=True)
 

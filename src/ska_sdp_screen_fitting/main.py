@@ -12,10 +12,10 @@ def start():
     This is the entry point for the executable
     """
 
-    DESCRIPTION_TEXT = "Make a-term images from solutions.\n"
+    description_text = "Make a-term images from solutions.\n"
 
     parser = argparse.ArgumentParser(
-        description=DESCRIPTION_TEXT,
+        description=description_text,
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument("h5parmfile", help="Filename of input H5parm")

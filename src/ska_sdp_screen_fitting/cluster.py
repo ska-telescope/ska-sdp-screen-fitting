@@ -96,7 +96,8 @@ def get_fast_solve_intervals(
         solint = max(1, int(round(solint)))
         if solint < target_timestep:
             log.warn(
-                "Not enough memory available for fast-phase solve. Reducing"
+                "Not enough memory available "  # pylint: disable=C0209
+                "for fast-phase solve. Reducing"
                 " solution time interval from {0} to {1} time slots".format(
                     target_timestep, solint
                 )
@@ -221,7 +222,8 @@ def get_slow_solve_intervals(
         solint = max(1, int(round(solint)))
         if solint < target_timestep:
             log.warn(
-                "Not enough memory available for slow-gain solve. Reducing"
+                "Not enough memory available "  # pylint: disable=C0209
+                "for slow-gain solve. Reducing"
                 " solution time interval from {0} to {1} time slots".format(
                     target_timestep, solint
                 )

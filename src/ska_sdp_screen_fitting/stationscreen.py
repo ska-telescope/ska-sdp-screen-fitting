@@ -1,3 +1,4 @@
+# pylint: disable=C0302
 """
 This is the station-screen operation for LoSoTo
 """
@@ -130,13 +131,13 @@ def _get_ant_dist(ant_xyz, ref_xyz):
     )
 
 
-def _getxy(RA, Dec, mid_ra=None, mid_dec=None):
+def _getxy(ra_list, dec_list, mid_ra=None, mid_dec=None):
     """
     Returns array of projected x and y values.
 
     Parameters
     ----------
-    RA, Dec : list
+    ra_list, dec_list : list
         Lists of RA and Dec in degrees
     mid_ra : float
         RA for WCS reference in degrees
@@ -151,7 +152,7 @@ def _getxy(RA, Dec, mid_ra=None, mid_dec=None):
     """
 
     if mid_ra is None or mid_dec is None:
-        x_coord, y_coord = _radec2xy(RA, Dec)
+        x_coord, y_coord = _radec2xy(ra_list, dec_list)
 
         # Refine x and y using midpoint
         if len(x_coord) > 1:
@@ -162,22 +163,26 @@ def _getxy(RA, Dec, mid_ra=None, mid_dec=None):
             try:
                 midxind = np.where(np.array(x_coord)[xind] > xmid)[0][0]
                 midyind = np.where(np.array(y_coord)[yind] > ymid)[0][0]
-                mid_ra = RA[xind[midxind]]
-                mid_dec = Dec[yind[midyind]]
-                x_coord, y_coord = _radec2xy(RA, Dec, mid_ra, mid_dec)
+                mid_ra = ra_list[xind[midxind]]
+                mid_dec = dec_list[yind[midyind]]
+                x_coord, y_coord = _radec2xy(
+                    ra_list, dec_list, mid_ra, mid_dec
+                )
             except IndexError:
-                mid_ra = RA[0]
-                mid_dec = Dec[0]
+                mid_ra = ra_list[0]
+                mid_dec = dec_list[0]
         else:
-            mid_ra = RA[0]
-            mid_dec = Dec[0]
+            mid_ra = ra_list[0]
+            mid_dec = dec_list[0]
 
-    x_coord, y_coord = _radec2xy(RA, Dec, ref_ra=mid_ra, ref_dec=mid_dec)
+    x_coord, y_coord = _radec2xy(
+        ra_list, dec_list, ref_ra=mid_ra, ref_dec=mid_dec
+    )
 
     return np.array([x_coord, y_coord]), mid_ra, mid_dec
 
 
-def _radec2xy(RA, Dec, ref_ra=None, ref_dec=None):
+def _radec2xy(ra_list, dec_list, ref_ra=None, ref_dec=None):
     """
     Returns x, y for input RA, Dec.
 
@@ -187,9 +192,9 @@ def _radec2xy(RA, Dec, ref_ra=None, ref_dec=None):
 
     Parameters
     ----------
-    RA : list
+    ra_list : list
         List of RA values in degrees
-    Dec : list
+    dec_list : list
         List of Dec values in degrees
     ref_ra : float, optional
         Reference RA in degrees.
@@ -207,14 +212,14 @@ def _radec2xy(RA, Dec, ref_ra=None, ref_dec=None):
     x_coords = []
     y_coords = []
     if ref_ra is None:
-        ref_ra = RA[0]
+        ref_ra = ra_list[0]
     if ref_dec is None:
-        ref_dec = Dec[0]
+        ref_dec = dec_list[0]
 
     # Make wcs object to handle transformation from RA and Dec to pixel coords.
     wcs_object = _make_wcs(ref_ra, ref_dec)
 
-    for ra_deg, dec_deg in zip(RA, Dec):
+    for ra_deg, dec_deg in zip(ra_list, dec_list):
         ra_dec = np.array([[ra_deg, dec_deg]])
         x_coords.append(wcs_object.wcs_world2pix(ra_dec, 0)[0][0])
         y_coords.append(wcs_object.wcs_world2pix(ra_dec, 0)[0][1])
@@ -243,24 +248,24 @@ def _xy2radec(x_coords, y_coords, ref_ra=0.0, ref_dec=0.0):
 
     Returns
     -------
-    RA, Dec : list, list
+    ra_list, dec_list : list, list
         Lists of RA and Dec values corresponding to the input x and y pixel
         values
 
     """
 
-    RA = []
-    Dec = []
+    ra_list = []
+    dec_list = []
 
     # Make wcs object to handle transformation from RA and Dec to pixel coords.
     wcs_object = _make_wcs(ref_ra, ref_dec)
 
-    for xp, yp in zip(x_coords, y_coords):
-        x_y = np.array([[xp, yp]])
-        RA.append(wcs_object.wcs_pix2world(x_y, 0)[0][0])
-        Dec.append(wcs_object.wcs_pix2world(x_y, 0)[0][1])
+    for x_point, y_point in zip(x_coords, y_coords):
+        x_y = np.array([[x_point, y_point]])
+        ra_list.append(wcs_object.wcs_pix2world(x_y, 0)[0][0])
+        dec_list.append(wcs_object.wcs_pix2world(x_y, 0)[0][1])
 
-    return RA, Dec
+    return ra_list, dec_list
 
 
 def _make_wcs(ref_ra, ref_dec):
@@ -372,8 +377,8 @@ def _circ_chi2(samples, weights):
     meanx2, sumw = np.average(
         x_2 ** 2, weights=weights[unflagged], returned=True
     )
-    R = np.hypot(meanx1, meanx2)
-    var = 1.0 - R
+    r_val = np.hypot(meanx1, meanx2)
+    var = 1.0 - r_val
 
     return var * sumw
 
@@ -557,10 +562,10 @@ def _fit_screen(
         screen_fit_all[unflagged[0], :] = screen_fit[:, np.newaxis]
         flagged = np.where(weights <= 0.0)
         for findx in flagged[0]:
-            p = pp_all[findx, :]
-            diff_squared = np.sum(np.square(pierce_points - p), axis=1)
-            c = -((diff_squared / (r_0 ** 2)) ** (beta / 2.0)) / 2.0
-            screen_fit_all[findx, :] = np.dot(c, screen_fit_white)
+            p_val = pp_all[findx, :]
+            diff_squared = np.sum(np.square(pierce_points - p_val), axis=1)
+            c_val = -((diff_squared / (r_0 ** 2)) ** (beta / 2.0)) / 2.0
+            screen_fit_all[findx, :] = np.dot(c_val, screen_fit_white)
         c_matrix, pinv_c, unit_matrix = full_matrices
         screen_fit_white_all = np.dot(pinv_c, screen_fit_all)
         if screen_type == "amplitude":
@@ -918,9 +923,8 @@ def run(
         )
         return 1
     logging.info(
-        "Using solution table {0} to calculate {1} screens".format(
-            soltab.name, screen_type
-        )
+        "Using solution table {0} to calculate {1} "  # pylint: disable=C0209
+        "screens".format(soltab.name, screen_type)
     )
 
     # Load values, etc.
@@ -1002,7 +1006,8 @@ def run(
             if scale_dist is None:
                 scale_dist = max(dist)
             logging.info(
-                "Using variable order (with max order = {0} "
+                "Using variable order"  # pylint: disable=C0209
+                " (with max order  = {0} "
                 "and scaling dist = {1} m)".format(order, scale_dist)
             )
             station_order = []
@@ -1020,7 +1025,9 @@ def run(
                 )
     else:
         station_order = [order] * len(station_names)
-        logging.info("Using order = {0}".format(order))
+        logging.info(
+            "Using order = {0}".format(order)  # pylint: disable=C0209
+        )
 
     # Initialize various arrays and parameters
     SCREEN = np.zeros((n_sources, n_stations, n_times, n_freqs, n_pols))
@@ -1082,7 +1089,7 @@ def run(
     )  # order is now ['time', 'freq', 'ant', 'dir', 'pol']
     if is_scalar:
         screen_st = solset.make_soltab(
-            "{}screen".format(screen_type),
+            f"{screen_type}screen",
             outsoltab,
             axes_names=["time", "freq", "ant", "dir"],
             axes_vals=[times_out, freqs_out, ants_out, dirs_out],
@@ -1097,7 +1104,7 @@ def run(
                 [1, 2, 0, 3]
             )  # order is now [time, ant, freq, pol]
         resscreen_st = solset.make_soltab(
-            "{}screenresid".format(screen_type),
+            f"{screen_type}screenresid",
             outsoltab + "resid",
             axes_names=["time", "freq", "ant", "dir"],
             axes_vals=[times_out, freqs_out, ants_out, dirs_out],
@@ -1107,7 +1114,7 @@ def run(
     else:
         pols_out = soltab.pol[:]
         screen_st = solset.make_soltab(
-            "{}screen".format(screen_type),
+            f"{screen_type}screen",
             outsoltab,
             axes_names=["time", "freq", "ant", "dir", "pol"],
             axes_vals=[times_out, freqs_out, ants_out, dirs_out, pols_out],
@@ -1122,7 +1129,7 @@ def run(
                 [1, 2, 0, 3]
             )  # order is now [time, ant, freq, pol]
         resscreen_st = solset.make_soltab(
-            "{}screenresid".format(screen_type),
+            f"{screen_type}screenresid",
             outsoltab + "resid",
             axes_names=["time", "freq", "ant", "dir", "pol"],
             axes_vals=[times_out, freqs_out, ants_out, dirs_out, pols_out],
