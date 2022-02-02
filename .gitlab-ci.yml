@@ -1,0 +1,31 @@
+image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
+
+default:
+  tags:
+    - k8srunner
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+stages:
+  - lint
+  - build
+  - test
+  - publish
+  - pages
+  - scan
+
+# Enable caching for python
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - .cache/pip
+
+include:
+  # Python
+  - project: "ska-telescope/templates-repository"
+    file: "gitlab-ci/includes/python.gitlab-ci.yml"
+  # OCI
+  - project: "ska-telescope/templates-repository"
+    file: "gitlab-ci/includes/oci-image.gitlab-ci.yml"
