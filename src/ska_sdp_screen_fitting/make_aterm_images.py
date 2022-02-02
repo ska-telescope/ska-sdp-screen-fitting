@@ -1,5 +1,6 @@
 """
-Script to make a-term images from solutions
+make_aterm_images.py: Script to make a-term images from solutions
+SPDX-License-Identifier: BSD-3-Clause
 """
 
 

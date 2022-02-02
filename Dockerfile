@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 
-# Needed as we are not using an app.main folder for the fastapi
-ENV MODULE_NAME=ska-sdp-screen-fitting.make_aterm_images
+ENV MODULE_NAME=ska-sdp-screen-fitting.main
 
 # no questions, please
 ENV DEBIAN_FRONTEND=noninteractive 
