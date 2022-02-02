@@ -1,4 +1,7 @@
-""" Test screen fitting functionality """
+"""
+test_fit_screens.py: Test screen fitting functionality
+SPDX-License-Identifier: BSD-3-Clause
+"""
 
 import os
 import shutil
