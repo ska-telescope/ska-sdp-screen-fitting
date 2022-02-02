@@ -14,6 +14,7 @@ stages:
   - test
   - publish
   - pages
+  - scan
 
 # Enable caching for python
 cache:
@@ -25,3 +26,6 @@ include:
   # Python
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/python.gitlab-ci.yml"
+  # OCI
+  - project: "ska-telescope/templates-repository"
+    file: "gitlab-ci/includes/oci-image.gitlab-ci.yml"
