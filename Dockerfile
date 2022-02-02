@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-ENV MODULE_NAME=ska-sdp-screen-fitting.main
+ENV MODULE_NAME=ska_sdp_screen_fitting.main
 
 # no questions, please
 ENV DEBIAN_FRONTEND=noninteractive 
