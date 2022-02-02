@@ -4,7 +4,9 @@ SPDX-License-Identifier: BSD-3-Clause
 """
 
 import argparse
+
 from ska_sdp_screen_fitting.make_aterm_images import make_aterm_image
+
 
 def start():
     """

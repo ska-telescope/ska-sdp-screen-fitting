@@ -4,4 +4,4 @@
 PYTHON_SWITCHES_FOR_FLAKE8=--ignore=E203,W503
 
 # Disable linting errors for W0613(unused-argument) and R0913(too-many-arguments). Implementation will be added in later MRs
-PYTHON_SWITCHES_FOR_PYLINT=--disable=R0913,W0613
+PYTHON_SWITCHES_FOR_PYLINT=--disable=R0801,R0913,W0613
