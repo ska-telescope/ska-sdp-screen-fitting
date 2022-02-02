@@ -1,6 +1,6 @@
 """
-main.py: Script to invoke screen fitting algorithm
-SPDX-License-Identifier: BSD-3-Clause
+    main.py: Script to invoke screen fitting algorithm
+    SPDX-License-Identifier: BSD-3-Clause
 """
 
 import argparse
