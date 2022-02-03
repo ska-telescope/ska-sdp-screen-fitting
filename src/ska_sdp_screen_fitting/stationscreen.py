@@ -93,8 +93,8 @@ def _calculate_piercepoints(station_positions, source_positions):
     piercepoints = np.zeros((n_piercepoints, 3))
 
     xyz = np.zeros((n_sources, 3))
-    ra_deg = source_positions.T[0] * 180.0 / np.pi
-    dec_deg = source_positions.T[1] * 180.0 / np.pi
+    ra_deg = np.rad2deg(source_positions.T[0])
+    dec_deg = np.rad2deg(source_positions.T[1])
     xy_coord, mid_ra, mid_dec = _getxy(ra_deg, dec_deg)
     xyz[:, 0] = xy_coord[0]
     xyz[:, 1] = xy_coord[1]

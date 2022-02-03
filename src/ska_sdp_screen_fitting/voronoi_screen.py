@@ -89,14 +89,14 @@ class VoronoiScreen(Screen):
 
         self.source_names = soltab_ph.dir
         self.source_dict = solset.get_source()
-        self.source_positions = []
-        for source in self.source_names:
-            self.source_positions.append(self.source_dict[source])
+        self.source_positions = [
+            self.source_dict[source] for source in self.source_names
+        ]
         self.station_names = soltab_ph.ant
         self.station_dict = solset.get_ant()
-        self.station_positions = []
-        for station in self.station_names:
-            self.station_positions.append(self.station_dict[station])
+        self.station_positions = [
+            self.station_dict[station] for station in self.station_names
+        ]
         h5_file.close()
 
     def get_memory_usage(self, cellsize_deg):
