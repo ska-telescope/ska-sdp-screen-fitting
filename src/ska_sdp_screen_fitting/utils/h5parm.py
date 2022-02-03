@@ -571,7 +571,7 @@ class Solset:
             soltab_name = None
 
         if soltab_name is None:
-            soltab_name = self._fisrt_avail_soltab_name(soltype)
+            soltab_name = self._first_avail_soltab_name(soltype)
 
         logging.info("Creating a new solution-table: %s.", soltab_name)
 
@@ -637,7 +637,7 @@ class Solset:
 
         return Soltab(soltab)
 
-    def _fisrt_avail_soltab_name(self, soltype):
+    def _first_avail_soltab_name(self, soltype):
         """
         Find the first available soltab name which
         has the form of "soltypeName###"
@@ -1916,9 +1916,5 @@ class Soltab:
         for attr in attrs:
             if attr[:-3] == "HISTORY":
                 history_list.append(self.obj.val.attrs[attr].decode())
-        if len(history_list) == 0:
-            history_str = ""
-        else:
-            history_str = "\n".join(history_list)
 
-        return history_str
+        return "" if len(history_list) == 0 else "\n".join(history_list)

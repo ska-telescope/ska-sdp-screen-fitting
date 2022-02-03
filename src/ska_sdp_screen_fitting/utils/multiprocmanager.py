@@ -1,5 +1,5 @@
 """
-    Some utilities for operations
+    This script contains the MultiprocManager, to handle multiprocessing
     SPDX-License-Identifier: BSD-3-Clause
 """
 
