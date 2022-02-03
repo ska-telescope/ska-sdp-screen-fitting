@@ -6,7 +6,16 @@ authors = ["chiara.salvoni <chiara.salvoni@cgi.com>"]
 license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.7,<3.11" #upper boundary added for scipy compatibility
+numpy = "1.21.5"
+tables = "^3.7.0"
+Shapely = "^1.8.0"
+astropy = "3.2.3"
+Pillow = "^9.0.0"
+scipy = "^1.7.3"
+lsmtool = "^1.4.3"
+psutil = "^5.9.0"
+
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
