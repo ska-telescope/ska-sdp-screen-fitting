@@ -2,6 +2,8 @@
     Version module.
 
     This module simply stores the version
+    
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 

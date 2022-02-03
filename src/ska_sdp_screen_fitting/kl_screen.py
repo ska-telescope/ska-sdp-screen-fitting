@@ -1,5 +1,7 @@
 """
     Class and helper functions for KL (Karhunen-Lo`eve) screens
+    
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 
@@ -11,7 +13,7 @@ import lsmtool
 import numpy as np
 from astropy import wcs
 
-import ska_sdp_screen_fitting.miscellaneous as misc
+import ska_sdp_screen_fitting.utils.processing_utils as misc
 from ska_sdp_screen_fitting import stationscreen
 from ska_sdp_screen_fitting.screen import Screen
 from ska_sdp_screen_fitting.utils.h5parm import H5parm
@@ -86,7 +88,7 @@ class KLScreen(Screen):
         # ]
         # sourceTable = list(zip(*(soltab_ph.dir, vals)))
 
-        # Now call LoSoTo's stationscreen operation to do the fitting. For the
+        # Now call the stationscreen operation to do the fitting. For the
         # phase screens, we reference the phases to the station with the least
         # amount of flagged solutions, drawn from the first 10 stations (to
         # ensure it is fairly central)
