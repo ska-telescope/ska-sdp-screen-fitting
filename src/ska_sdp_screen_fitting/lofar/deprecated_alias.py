@@ -1,5 +1,5 @@
 """
-    Some utilities for operations
+    Contains aliases for backward compatibility
 
     Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
@@ -7,14 +7,6 @@
 
 import functools  # for deprecated_alias decorator
 import warnings
-
-cacheSteps = [
-    "plot",
-    "clip",
-    "flag",
-    "norm",
-    "smooth",
-]  # steps to use chaced data
 
 
 # fancy backwards compatibility of keywords: allow aliases

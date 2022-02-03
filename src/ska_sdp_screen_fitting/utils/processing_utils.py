@@ -8,6 +8,7 @@
 import errno
 import os
 import pickle
+import psutil
 import shutil
 from math import modf
 
@@ -592,3 +593,21 @@ def remove_soltabs(solset, soltabnames):
             soltab.delete()
         except Exception:
             print(f'Error: soltab "{soltabname}" could not be removed')
+
+
+def get_available_memory():
+    """
+    Returns the available memory in GB
+
+    Note: a call to 'free' is used, which is parsed for the "available" value,
+    the last entry on the second line of output.
+
+    Returns
+    -------
+    available_gb : int
+        Available memory in GB
+    """
+
+    mem = psutil.virtual_memory()
+    available_gb = int(np.floor(mem.available / 1024 / 1024 / 1024))
+    return available_gb

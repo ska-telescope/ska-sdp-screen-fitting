@@ -16,7 +16,7 @@ import numpy as np
 import tables
 
 from ska_sdp_screen_fitting import _version
-from ska_sdp_screen_fitting.lofar.lib_losoto import deprecated_alias
+from ska_sdp_screen_fitting.lofar.deprecated_alias import deprecated_alias
 from ska_sdp_screen_fitting.utils._logging import logger as logging
 
 if sys.version_info > (3, 0):
