@@ -13,8 +13,8 @@ from astropy import wcs
 
 import ska_sdp_screen_fitting.miscellaneous as misc
 from ska_sdp_screen_fitting import stationscreen
-from ska_sdp_screen_fitting.h5parm import H5parm
 from ska_sdp_screen_fitting.screen import Screen
+from ska_sdp_screen_fitting.utils.h5parm import H5parm
 
 
 class KLScreen(Screen):

@@ -1,5 +1,5 @@
 """
-    Module that holds screen-related classes and functions
+    Module that holds base class for screen fitting
     SPDX-License-Identifier: BSD-3-Clause
 """
 import logging
@@ -12,7 +12,7 @@ from astropy.io import fits as pyfits
 from scipy import ndimage
 
 import ska_sdp_screen_fitting.miscellaneous as misc
-from ska_sdp_screen_fitting import cluster
+from ska_sdp_screen_fitting.lofar import cluster
 
 
 class Screen:
@@ -101,7 +101,7 @@ class Screen:
         """
         Fits screens to the input solutions
 
-        This method should be defined in the subclasses
+        This method is implemented in the subclasses
         """
 
     def interpolate(self, interp_kind="nearest"):

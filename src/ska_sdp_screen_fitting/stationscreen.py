@@ -10,11 +10,9 @@ from astropy.wcs import WCS
 from scipy.linalg import pinv, svd
 
 from ska_sdp_screen_fitting import reweight
-from ska_sdp_screen_fitting._logging import logger as logging
-from ska_sdp_screen_fitting.lib_operations import (
-    MultiprocManager,
-    normalize_phase,
-)
+from ska_sdp_screen_fitting.utils._logging import logger as logging
+from ska_sdp_screen_fitting.utils.multiprocmanager import MultiprocManager
+from ska_sdp_screen_fitting.utils.processing_utils import normalize_phase
 
 logging.debug("Loading STATIONSCREEN module.")
 

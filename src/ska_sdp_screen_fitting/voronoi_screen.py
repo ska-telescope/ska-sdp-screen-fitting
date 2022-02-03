@@ -15,8 +15,8 @@ from scipy.spatial import Voronoi  # pylint: disable=E0611
 from shapely.geometry import Point
 
 import ska_sdp_screen_fitting.miscellaneous as misc
-from ska_sdp_screen_fitting.h5parm import H5parm
 from ska_sdp_screen_fitting.screen import Screen
+from ska_sdp_screen_fitting.utils.h5parm import H5parm
 
 
 class VoronoiScreen(Screen):

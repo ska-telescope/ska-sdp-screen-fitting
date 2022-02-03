@@ -1,12 +1,12 @@
 """
-make_aterm_images.py: Script to make a-term images from solutions
-SPDX-License-Identifier: BSD-3-Clause
+    make_aterm_images.py: Script to make a-term images from solutions
+    SPDX-License-Identifier: BSD-3-Clause
 """
 
 import os
 
-from ska_sdp_screen_fitting.h5parm import H5parm
 from ska_sdp_screen_fitting.kl_screen import KLScreen
+from ska_sdp_screen_fitting.utils.h5parm import H5parm
 from ska_sdp_screen_fitting.voronoi_screen import VoronoiScreen
 
 
