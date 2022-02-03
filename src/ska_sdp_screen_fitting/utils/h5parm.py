@@ -16,8 +16,8 @@ import numpy as np
 import tables
 
 from ska_sdp_screen_fitting import _version
-from ska_sdp_screen_fitting.utils.deprecated_alias import deprecated_alias
 from ska_sdp_screen_fitting.utils._logging import logger as logging
+from ska_sdp_screen_fitting.utils.deprecated_alias import deprecated_alias
 
 if sys.version_info > (3, 0):
     from itertools import zip_longest
