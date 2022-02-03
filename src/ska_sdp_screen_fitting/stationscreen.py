@@ -1,6 +1,6 @@
 # pylint: disable=C0302
 """
-    This script contains the mathematical operation which performs the 
+    This script contains the mathematical operation which performs the
     interpolation in frequency. Used in KLScreen.fit
 
     Copyright (c) 2022, SKAO / Science Data Processor

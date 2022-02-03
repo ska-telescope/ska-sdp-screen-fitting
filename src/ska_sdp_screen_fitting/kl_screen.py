@@ -1,6 +1,6 @@
 """
     Class and helper functions for KL (Karhunen-Lo`eve) screens
-    
+
     Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
