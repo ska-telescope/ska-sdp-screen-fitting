@@ -1,5 +1,7 @@
 """
     main.py: Script to invoke screen fitting algorithm
+
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 

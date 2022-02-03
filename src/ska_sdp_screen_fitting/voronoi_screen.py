@@ -1,5 +1,7 @@
 """
     Contains class for Voronoi screens
+
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 
@@ -14,14 +16,14 @@ from astropy import wcs
 from scipy.spatial import Voronoi  # pylint: disable=E0611
 from shapely.geometry import Point
 
-import ska_sdp_screen_fitting.miscellaneous as misc
+import ska_sdp_screen_fitting.utils.processing_utils as misc
 from ska_sdp_screen_fitting.screen import Screen
 from ska_sdp_screen_fitting.utils.h5parm import H5parm
 
 
 class VoronoiScreen(Screen):
     """
-    Class for Voronoi screens
+    Class for Voronoi screens.
     """
 
     def __init__(

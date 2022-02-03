@@ -1,5 +1,7 @@
 """
     This script contains the MultiprocManager, to handle multiprocessing
+    
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 

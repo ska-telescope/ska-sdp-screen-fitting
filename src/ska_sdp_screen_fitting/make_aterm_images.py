@@ -1,5 +1,7 @@
 """
     make_aterm_images.py: Script to make a-term images from solutions
+
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 

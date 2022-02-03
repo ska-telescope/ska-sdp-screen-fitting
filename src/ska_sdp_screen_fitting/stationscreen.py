@@ -1,6 +1,9 @@
 # pylint: disable=C0302
 """
-    This is the station-screen operation for LoSoTo
+    This script contains the mathematical operation which performs the 
+    interpolation in frequency. Used in KLScreen.fit
+
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 
@@ -9,10 +12,12 @@ import numpy as np
 from astropy.wcs import WCS
 from scipy.linalg import pinv, svd
 
-from ska_sdp_screen_fitting import reweight
 from ska_sdp_screen_fitting.utils._logging import logger as logging
 from ska_sdp_screen_fitting.utils.multiprocmanager import MultiprocManager
-from ska_sdp_screen_fitting.utils.processing_utils import normalize_phase
+from ska_sdp_screen_fitting.utils.processing_utils import (
+    nancircstd,
+    normalize_phase,
+)
 
 logging.debug("Loading STATIONSCREEN module.")
 
@@ -329,7 +334,7 @@ def _flag_outliers(weights, residual, nsigma, screen_type):
         residual = normalize_phase(residual)
         residual_nan = residual.copy()
         residual_nan[flagged] = np.nan
-        screen_stddev = reweight._nancircstd(residual_nan, axis=0)
+        screen_stddev = nancircstd(residual_nan, axis=0)
     elif screen_type in ("tec", "amplitude"):
         # Use normal stddev
         screen_stddev = np.sqrt(
@@ -1040,8 +1045,7 @@ def run(
                 ] = station_order[station_idx]
     r_0 = 100
 
-    # Calculate full piercepoint arrays # maybe outdated, height not really
-    # used .. ?
+    # Calculate full piercepoint arrays
     # coordinate conversion RA-DEC to xy_coord (image plane)
     PIERCE_POINTS, mid_ra, mid_dec = _calculate_piercepoints(
         np.array([station_positions[0]]), np.array(source_positions)

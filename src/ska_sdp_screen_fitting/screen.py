@@ -1,5 +1,7 @@
 """
     Module that holds base class for screen fitting
+
+    Copyright (c) 2022, SKAO / Science Data Processor
     SPDX-License-Identifier: BSD-3-Clause
 """
 import logging
@@ -11,7 +13,7 @@ from astropy.coordinates import Angle
 from astropy.io import fits as pyfits
 from scipy import ndimage
 
-import ska_sdp_screen_fitting.miscellaneous as misc
+import ska_sdp_screen_fitting.utils.processing_utils as misc
 from ska_sdp_screen_fitting.lofar import cluster
 
 
