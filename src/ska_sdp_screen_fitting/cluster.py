@@ -3,9 +3,9 @@
     SPDX-License-Identifier: BSD-3-Clause
 """
 import logging
-import subprocess
 
 import numpy as np
+import psutil
 
 log = logging.getLogger("rapthor:cluster")
 
@@ -22,14 +22,9 @@ def get_available_memory():
     available_gb : int
         Available memory in GB
     """
-    try:
-        print(subprocess.getoutput("free -t -g"))
-        memstr = subprocess.getoutput("free -t -g").split("\n")[
-            1
-        ]  # second line
-        available_gb = list(map(int, memstr.split()[1:]))[-1]  # last entry
-    except Exception:
-        return 200
+
+    mem = psutil.virtual_memory()
+    available_gb = int(np.floor(mem.available / 1024 / 1024 / 1024))
     return available_gb
 
 
