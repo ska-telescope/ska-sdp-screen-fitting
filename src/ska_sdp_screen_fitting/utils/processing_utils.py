@@ -8,11 +8,11 @@
 import errno
 import os
 import pickle
-import psutil
 import shutil
 from math import modf
 
 import numpy as np
+import psutil
 from astropy.io import fits as pyfits
 from PIL import Image, ImageDraw
 from shapely.geometry import Point, Polygon
