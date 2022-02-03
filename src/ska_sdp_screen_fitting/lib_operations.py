@@ -12,7 +12,7 @@ from ska_sdp_screen_fitting._logging import logger as logging
 
 class MultiprocManager:
     """
-    This class is a manager for multiprocessing=
+    This class is a manager for multiprocessing
     """
 
     class MultiThread(multiprocessing.Process):
