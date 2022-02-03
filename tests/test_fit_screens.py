@@ -56,6 +56,10 @@ def test_fit_voronoi_screens():
         ncpu=0,
     )
 
+    assert os.path.isfile(f"{method}_0.fits")
+    assert os.path.isfile(f"{method}_template.fits")
+    assert os.path.isfile(f"{method}.txt")
+
 
 def test_fit_kl_screens():
     """
@@ -77,3 +81,6 @@ def test_fit_kl_screens():
         smooth_deg=0,
         ncpu=0,
     )
+
+    assert os.path.isfile(f"{method}_0.fits")
+    assert os.path.isfile(f"{method}.txt")
