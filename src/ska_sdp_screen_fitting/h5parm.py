@@ -1235,15 +1235,9 @@ class Soltab:
             selection = self.selection
 
         if self.use_cache:
-            if weight:
-                data_vals = self.cache_weight
-            else:
-                data_vals = self.cache_val
+            data_vals = self.cache_weight if weight else self.cache_val
         else:
-            if weight:
-                data_vals = self.obj.weight
-            else:
-                data_vals = self.obj.val
+            data_vals = self.obj.weight if weight else self.obj.val
 
         # NOTE: pytables has a nasty limitation that only one list can be
         # applied when selecting.
