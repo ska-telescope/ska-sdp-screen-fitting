@@ -99,7 +99,7 @@ class H5parm:
         if os.path.isfile(h_5_parm_file):
             if not tables.is_hdf5_file(h_5_parm_file):
                 logging.critical("Not a HDF5 file: %s.", h_5_parm_file)
-                raise Exception("Not a HDF5 file: " + h_5_parm_file + ".")
+                raise Exception(f"Not a HDF5 file: {h_5_parm_file}.")
             if readonly:
                 logging.debug("Reading from %s.", h_5_parm_file)
                 self.table = tables.open_file(
@@ -131,7 +131,7 @@ class H5parm:
 
         else:
             if readonly:
-                raise Exception("Missing file " + h_5_parm_file + ".")
+                raise Exception(f"Missing file {h_5_parm_file}.")
             logging.debug("Creating %s.", h_5_parm_file)
             # add a compression filter
             filter = tables.Filters(complevel=complevel, complib=complib)
@@ -210,10 +210,9 @@ class H5parm:
         list
             A list of all solsets objects.
         """
-        solsets = []
-        for solset in self.table.root._v_groups.values():
-            solsets.append(Solset(solset))
-        return solsets
+        return [
+            Solset(solset) for solset in self.table.root._v_groups.values()
+        ]
 
     def get_solset_names(self):
         """
@@ -224,10 +223,11 @@ class H5parm:
         list
             A list of str of all solsets names.
         """
-        solset_names = []
-        for solset_name in iter(list(self.table.root._v_groups.keys())):
-            solset_names.append(solset_name)
-        return solset_names
+
+        return [
+            solset_name
+            for solset_name in iter(list(self.table.root._v_groups.keys()))
+        ]
 
     def get_solset(self, solset):
         """
@@ -245,7 +245,7 @@ class H5parm:
         """
         if solset not in self.get_solset_names():
             logging.critical("Cannot find solset: %s.", solset)
-            raise Exception("Cannot find solset: " + solset + ".")
+            raise Exception(f"Cannot find solset: {solset}.")
 
         return Solset(self.table.get_node("/", solset))
 
@@ -721,11 +721,7 @@ class Solset:
 
         if soltab not in self.get_soltab_names():
             raise Exception(
-                "Solution-table "
-                + soltab
-                + " not found in solset "
-                + self.name
-                + "."
+                f"Solution-table {soltab}  not found in solset {self.name}."
             )
 
         return Soltab(self.obj._f_get_child(soltab), use_cache, sel)
