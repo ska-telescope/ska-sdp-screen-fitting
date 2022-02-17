@@ -232,21 +232,25 @@ def test_fit_kl_screens():
             if coord_y[i[0]] >= 0 and coord_y[i[0]] < im_size:
                 assert (
                     screen_cube[:, :, :, 0, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 0] * np.cos(phase_corrected[:, :, :, i[0]])
+                    - ampl[0, :, :, i[0], 0]
+                    * np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
                     screen_cube[:, :, :, 1, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 0] * np.sin(phase_corrected[:, :, :, i[0]])
+                    - ampl[0, :, :, i[0], 0]
+                    * np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
                     screen_cube[:, :, :, 2, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 1] * np.cos(phase_corrected[:, :, :, i[0]])
+                    - ampl[0, :, :, i[0], 1]
+                    * np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
                     screen_cube[:, :, :, 3, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 1] * np.sin(phase_corrected[:, :, :, i[0]])
+                    - ampl[0, :, :, i[0], 1]
+                    * np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
