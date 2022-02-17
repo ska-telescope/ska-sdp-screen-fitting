@@ -144,26 +144,26 @@ def test_fit_voronoi_screens():
     # than the threshold
     threshold = 1e-4
     for i in enumerate(coord_x):
-        if coord_x[i] >= 0 and coord_x[i] < im_size:
-            if coord_y[i] >= 0 and coord_y[i] < im_size:
+        if coord_x[i[0]] >= 0 and coord_x[i[0]] < im_size:
+            if coord_y[i[0]] >= 0 and coord_y[i[0]] < im_size:
                 assert (
-                    screen_cube[:, :, :, 0, coord_x[i], coord_y[i]]
-                    - np.cos(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 0, coord_x[i[0]], coord_y[i[0]]]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 1, coord_x[i], coord_y[i]]
-                    - np.sin(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 1, coord_x[i[0]], coord_y[i[0]]]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 2, coord_x[i], coord_y[i]]
-                    - np.cos(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 2, coord_x[i[0]], coord_y[i[0]]]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 3, coord_x[i], coord_y[i]]
-                    - np.sin(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 3, coord_x[i[0]], coord_y[i[0]]]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
 
@@ -228,25 +228,25 @@ def test_fit_kl_screens():
     # than the threshold
     threshold = 1e-2
     for i in enumerate(coord_x):
-        if coord_x[i] >= 0 and coord_x[i] < im_size:
-            if coord_y[i] >= 0 and coord_y[i] < im_size:
+        if coord_x[i[0]] >= 0 and coord_x[i[0]] < im_size:
+            if coord_y[i[0]] >= 0 and coord_y[i[0]] < im_size:
                 assert (
-                    screen_cube[:, :, :, 0, coord_x[i], coord_y[i]]
-                    - ampl[0, :, :, i, 0] * np.cos(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 0, coord_x[i[0]], coord_y[i[0]]]
+                    - ampl[0, :, :, i[0], 0] * np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 1, coord_x[i], coord_y[i]]
-                    - ampl[0, :, :, i, 0] * np.sin(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 1, coord_x[i[0]], coord_y[i[0]]]
+                    - ampl[0, :, :, i[0], 0] * np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 2, coord_x[i], coord_y[i]]
-                    - ampl[0, :, :, i, 1] * np.cos(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 2, coord_x[i[0]], coord_y[i[0]]]
+                    - ampl[0, :, :, i[0], 1] * np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 3, coord_x[i], coord_y[i]]
-                    - ampl[0, :, :, i, 1] * np.sin(phase_corrected[:, :, :, i])
+                    screen_cube[:, :, :, 3, coord_x[i[0]], coord_y[i[0]]]
+                    - ampl[0, :, :, i[0], 1] * np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
