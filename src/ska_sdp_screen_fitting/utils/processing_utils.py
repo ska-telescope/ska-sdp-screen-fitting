@@ -229,11 +229,11 @@ def make_template_image(
     else:
         if aterm_type == "gain":
             # gain aterm images: add MATRIX info
-            header["CRVAL{i}"] = 0.0
-            header["CDELT{i}"] = 1.0
-            header["CRPIX{i}"] = 1.0
-            header["CUNIT{i}"] = ""
-            header["CTYPE{i}"] = "MATRIX"
+            header[f"CRVAL{i}"] = 0.0
+            header[f"CDELT{i}"] = 1.0
+            header[f"CRPIX{i}"] = 1.0
+            header[f"CUNIT{i}"] = ""
+            header[f"CTYPE{i}"] = "MATRIX"
             i += 1
 
         # dTEC or gain: add ANTENNA info
