@@ -664,12 +664,12 @@ def get_patch_coordinates(source_positions, wcs_obj):
     dec_ind = wcs_obj.axis_type_names.index("DEC")
 
     # Convert ra-dec to pixel coordinates
-    ra = source_positions[:, 0]
+    ras = source_positions[:, 0]
     dec = source_positions[:, 1]
     xy_coord = []
     coord_patch_x = []
     coord_patch_y = []
-    for ra_vert, dec_vert in zip(ra, dec):
+    for ra_vert, dec_vert in zip(ras, dec):
         ra_dec = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
         ra_dec[0][ra_ind] = ra_vert
         ra_dec[0][dec_ind] = dec_vert
