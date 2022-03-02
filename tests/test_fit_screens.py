@@ -8,13 +8,13 @@ import shutil
 import uuid
 
 import h5py
-import lsmtool
 import numpy as np
 import pytest
 from astropy import wcs
 from astropy.io import fits
 
 from ska_sdp_screen_fitting.make_aterm_images import make_aterm_image
+from ska_sdp_screen_fitting.utils import processing_utils
 
 CWD = os.getcwd()
 SOLFILE = "solutions.h5"
@@ -38,51 +38,6 @@ def source_env():
     # Post-test: clean up
     os.chdir(CWD)
     shutil.rmtree(tmpdir)
-
-
-def read_patch_list(skymodel, h5_file, soltab):
-    """Read patch coordinates from skymodel file"""
-
-    skymod = lsmtool.load(skymodel)
-    source_dict = skymod.getPatchPositions()
-    source_positions = []
-    for source in list(h5_file[f"sol000/{soltab}/dir"]):
-        radecpos = source_dict[str(source, "utf-8").strip("[]")]
-        source_positions.append([radecpos[0].value, radecpos[1].value])
-    source_positions = np.array(source_positions)
-    return source_positions
-
-
-def get_patch_coordinates(source_positions, wcs_obj):
-    """Convert coordinates from ra-dec to pixel coordinates"""
-
-    ra_ind = wcs_obj.axis_type_names.index("RA")
-    dec_ind = wcs_obj.axis_type_names.index("DEC")
-
-    # Convert ra-dec to pixel coordinates
-    ra = source_positions[:, 0]
-    dec = source_positions[:, 1]
-    xy_coord = []
-    coord_patch_x = []
-    coord_patch_y = []
-    for ra_vert, dec_vert in zip(ra, dec):
-        ra_dec = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
-        ra_dec[0][ra_ind] = ra_vert
-        ra_dec[0][dec_ind] = dec_vert
-        xy_coord.append(
-            (
-                wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind],
-                wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind],
-            )
-        )
-        coord_patch_x.append(
-            int(np.round(wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind]))
-        )
-        coord_patch_y.append(
-            int(np.round(wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind]))
-        )
-
-    return coord_patch_x, coord_patch_y
 
 
 def test_fit_voronoi_screens():
@@ -117,11 +72,13 @@ def test_fit_voronoi_screens():
     # 1 - Get the pixel coordinate of the patches
     # 2 - Open the calibration solution and correct for the phase reference
     h5_file = h5py.File(SOLFILE, "r")
-    radec_coord = read_patch_list(SKYMODEL, h5_file, soltab)
+    radec_coord = processing_utils.read_patch_list(SKYMODEL, h5_file, soltab)
     filename = f"{method}_0.fits"
     hdu = fits.open(filename)
     wcs_obj = wcs.WCS(hdu[0].header)
-    [coord_x, coord_y] = get_patch_coordinates(radec_coord, wcs_obj)
+    [coord_x, coord_y] = processing_utils.get_patch_coordinates(
+        radec_coord, wcs_obj
+    )
     screen_cube = hdu[0].data
     im_size = screen_cube.shape[4]
     phase = h5_file["sol000/phase000/val"]
@@ -198,11 +155,15 @@ def test_fit_kl_screens():
     # 1 - Get the pixel coordinate of the patches
     # 2 - Open the calibration solution and correct for the phase reference
     h5_file = h5py.File(SOLFILE, "r")
-    radec_coord = read_patch_list(SKYMODEL, h5_file, "phase000")
+    radec_coord = processing_utils.read_patch_list(
+        SKYMODEL, h5_file, "phase000"
+    )
     filename = f"{method}_0.fits"
     hdu = fits.open(filename)
     wcs_obj = wcs.WCS(hdu[0].header)
-    [coord_x, coord_y] = get_patch_coordinates(radec_coord, wcs_obj)
+    [coord_x, coord_y] = processing_utils.get_patch_coordinates(
+        radec_coord, wcs_obj
+    )
 
     screen_cube = hdu[0].data
     im_size = screen_cube.shape[4]
