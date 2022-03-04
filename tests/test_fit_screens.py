@@ -52,13 +52,13 @@ def test_fit_voronoi_screens():
         soltabname=soltab,
         screen_type=method,
         outroot=method,
-        bounds_deg=[126.966898, 63.566717, 124.546030, 64.608827],
-        bounds_mid_deg=[125.779167, 64.092778],
+        bounds_deg=[124.565, 66.165, 127.895, 62.835],
+        bounds_mid_deg=[126.23, 64.50],
         skymodel=SKYMODEL,
         solsetname="sol000",
-        padding_fraction=1.4,
+        padding_fraction=0,
         cellsize_deg=0.2,
-        smooth_deg=0,
+        smooth_deg=0.1,
         ncpu=0,
     )
 
@@ -82,6 +82,9 @@ def test_fit_voronoi_screens():
     screen_cube = hdu[0].data
     im_size = screen_cube.shape[4]
     phase = h5_file["sol000/phase000/val"]
+
+    # re-arrange axes to allow correct broadcasting
+    ref_antenna = 0
     phase_corrected = np.zeros(
         (
             screen_cube.shape[0],
@@ -90,36 +93,36 @@ def test_fit_voronoi_screens():
             len(radec_coord),
         )
     )
-    for i in range(phase_corrected.shape[0]):
-        for k in range(phase_corrected.shape[1]):
-            for j in range(phase_corrected.shape[3]):
-                phase_corrected[i, k, :, j] = (
-                    phase[i, k, :, j] - phase[i, k, 0, j]
-                )
+    phase_corrected = (
+        np.transpose(phase, (2, 0, 1, 3)) - phase[:, :, ref_antenna, :]
+    )
+    phase_corrected = np.transpose(phase_corrected, (1, 2, 0, 3))
 
     # Assert that the error at the position of the patch is smaller
     # than the threshold
     threshold = 1e-4
     for i in enumerate(coord_x):
-        if coord_x[i[0]] >= 0 and coord_x[i[0]] < im_size:
-            if coord_y[i[0]] >= 0 and coord_y[i[0]] < im_size:
+        y = int(np.round(coord_x[i[0]]))
+        x = int(np.round(coord_y[i[0]]))
+        if x >= 0 and x < im_size:
+            if y >= 0 and y < im_size:
                 assert (
-                    screen_cube[:, :, :, 0, coord_x[i[0]], coord_y[i[0]]]
+                    screen_cube[:, :, :, 0, x, y]
                     - np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 1, coord_x[i[0]], coord_y[i[0]]]
+                    screen_cube[:, :, :, 1, x, y]
                     - np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 2, coord_x[i[0]], coord_y[i[0]]]
+                    screen_cube[:, :, :, 2, x, y]
                     - np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 3, coord_x[i[0]], coord_y[i[0]]]
+                    screen_cube[:, :, :, 3, x, y]
                     - np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
@@ -130,19 +133,20 @@ def test_fit_kl_screens():
     Tests kl screens generation
     """
 
+    soltab = "phase000"
     method = "kl"
     make_aterm_image(
         SOLFILE,
-        soltabname="gain000",
+        soltabname=soltab,
         screen_type=method,
         outroot=method,
-        bounds_deg=[126.966898, 63.566717, 124.546030, 64.608827],
-        bounds_mid_deg=[125.779167, 64.092778],
+        bounds_deg=[124.565, 66.165, 127.895, 62.835],
+        bounds_mid_deg=[126.23, 64.50],
         skymodel=SKYMODEL,
         solsetname="sol000",
-        padding_fraction=1.4,
+        padding_fraction=0,
         cellsize_deg=0.2,
-        smooth_deg=0,
+        smooth_deg=0.1,
         ncpu=0,
     )
 
@@ -155,9 +159,7 @@ def test_fit_kl_screens():
     # 1 - Get the pixel coordinate of the patches
     # 2 - Open the calibration solution and correct for the phase reference
     h5_file = h5py.File(SOLFILE, "r")
-    radec_coord = processing_utils.read_patch_list(
-        SKYMODEL, h5_file, "phase000"
-    )
+    radec_coord = processing_utils.read_patch_list(SKYMODEL, h5_file, soltab)
     filename = f"{method}_0.fits"
     hdu = fits.open(filename)
     wcs_obj = wcs.WCS(hdu[0].header)
@@ -167,8 +169,7 @@ def test_fit_kl_screens():
 
     screen_cube = hdu[0].data
     im_size = screen_cube.shape[4]
-    ampl = h5_file["sol000/amplitude000/val"]  # [1, 50, 62, 7, 2]
-    phase = h5_file["sol000/phase000/val"]  # [3,50,62,7]
+    phase = h5_file["sol000/phase000/val"]
 
     phase_corrected = np.zeros(
         (
@@ -178,40 +179,37 @@ def test_fit_kl_screens():
             len(radec_coord),
         )
     )
-    for i in range(phase_corrected.shape[0]):
-        for k in range(phase_corrected.shape[1]):
-            for j in range(phase_corrected.shape[3]):
-                phase_corrected[i, k, :, j] = (
-                    phase[i, k, :, j] - phase[i, k, 0, j]
-                )
+    ref_antenna = 0
+    phase_corrected = (
+        np.transpose(phase, (2, 0, 1, 3)) - phase[:, :, ref_antenna, :]
+    )
+    phase_corrected = np.transpose(phase_corrected, (1, 2, 0, 3))
 
     # Assert that the error at the position of the patch is smaller
     # than the threshold
-    threshold = 1e-2
+    threshold = 1e-1
     for i in enumerate(coord_x):
-        if coord_x[i[0]] >= 0 and coord_x[i[0]] < im_size:
-            if coord_y[i[0]] >= 0 and coord_y[i[0]] < im_size:
+        y = int(np.round(coord_x[i[0]]))
+        x = int(np.round(coord_y[i[0]]))
+        if x >= 0 and x < im_size:
+            if y >= 0 and y < im_size:
                 assert (
-                    screen_cube[:, :, :, 0, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 0]
-                    * np.cos(phase_corrected[:, :, :, i[0]])
+                    screen_cube[:, :, :, 0, x, y]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 1, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 0]
-                    * np.sin(phase_corrected[:, :, :, i[0]])
+                    screen_cube[:, :, :, 1, x, y]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 2, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 1]
-                    * np.cos(phase_corrected[:, :, :, i[0]])
+                    screen_cube[:, :, :, 2, x, y]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()
                 assert (
-                    screen_cube[:, :, :, 3, coord_x[i[0]], coord_y[i[0]]]
-                    - ampl[0, :, :, i[0], 1]
-                    * np.sin(phase_corrected[:, :, :, i[0]])
+                    screen_cube[:, :, :, 3, x, y]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
                     < threshold
                 ).all()

@@ -679,11 +679,7 @@ def get_patch_coordinates(source_positions, wcs_obj):
                 wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind],
             )
         )
-        coord_patch_x.append(
-            int(np.round(wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind]))
-        )
-        coord_patch_y.append(
-            int(np.round(wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind]))
-        )
+        coord_patch_x.append(wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind])
+        coord_patch_y.append(wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind])
 
     return coord_patch_x, coord_patch_y
