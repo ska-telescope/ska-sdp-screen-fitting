@@ -1,4 +1,7 @@
 """Script to plot screens with input solutions overlay"""
+import h5py
+from astropy.io import fits
+import matplotlib.pyplot as plt
 from astropy import wcs
 import numpy as np
 import sys
@@ -128,7 +131,7 @@ if __name__ == "__main__":
 
     # STEP 4
     # Read amplitude and phase from solution.h5, and subtract reference phase
-    phase = f["sol000/phase000/val"]  # [1, 9, 3, 7, 2]
+    phase = f["sol000/phase000/val"]
     phase_corrected = get_phase_corrected(phase)
 
     # option 1
