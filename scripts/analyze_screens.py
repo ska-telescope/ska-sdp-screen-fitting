@@ -74,7 +74,7 @@ def get_phase_corrected(phase, ref_antenna=0):
         Input phases as read from the h5 solutions file
     ref_antenna : int
         Antenna to be considered as phase reference
-   
+
     Returns
     -------
     phase_corrected : ndarray
@@ -94,28 +94,56 @@ def get_phase_corrected(phase, ref_antenna=0):
     return phase_corrected
 
 
-if __name__ == "__main__":
+def plot_screens(
+    h5_solution,
+    kl_screen,
+    voronoi_screen,
+    skymodel,
+    polarization_idx=1,
+    time=0,
+    antenna=1,
+    freq=3,
+):
+    """Plot fitted screens with the discrete input points overlaid
+    Parameters
+    ----------
+    h5_solution : string
+        Path to solution file (h5)
+    kl_screen : string
+        Path to kl screens (fits)
+    voronoi_screen : string
+        Path to voronoi screens (fits)
+    skymodel : string
+        Path to skymodel file
+    polarization_idx : int
+        Polarization index to plot
+    time : int
+        Solution interval to plot
+    antenna : int
+        Antenna to plot
+    freq : int
+        Frequency channel to plot
+    """
+
     # STEP 1
     # Load input/outputs
     # SCREEN FITTING INPUTS:
     # Load solutions.h5 and skymodel
-    f = h5py.File("../resources/solutions.h5", "r")
+    f = h5py.File(h5_solution, "r")
 
     # SCREEN FITTING OUTPUTS:
     # The screen fitting library produces as output a .fits image cube.
     # The outputs of the two different algorithms are loaded below as
     # "kl_cube" and "voronoi_cube"
     # the cube dimensions are = ["time", "freqs", "antennas", "pol", "x_coord", "y_coord"]
-    kl_cube = fits.open("../resources/kl_0.fits")[0]
-    voronoi_cube = fits.open("../resources/tessellated_0.fits")[0]
+    kl_cube = fits.open(kl_screen)[0]
+    voronoi_cube = fits.open(voronoi_screen)[0]
 
     # STEP 2
     # Convert the coordinates of the patches in the skymodel to
     # x,y coordinates in the screen
     # build image cube with reference points
-    radec_coord = processing_utils.read_patch_list(
-        "../resources/skymodel.txt", f, "phase000"
-    )
+    radec_coord = processing_utils.read_patch_list(skymodel, f, "phase000")
     w = wcs.WCS(kl_cube.header)
     [coord_patch_x, coord_patch_y] = processing_utils.get_patch_coordinates(
         radec_coord, w
@@ -148,7 +176,6 @@ if __name__ == "__main__":
 
     # STEP 5
     # Calculate the screen values at the patches position
-    polarization_idx = 3  # choose {0, 1, 2, 3}
     funcs = [np.cos, np.sin]
     val = (
         funcs[polarization_idx % 2](phase_corrected)
@@ -157,24 +184,20 @@ if __name__ == "__main__":
 
     # STEP 6
     # Make plots
-    time = 0
-    antenna = 1
-    freq_offset = 3
-
     [colormap_min_val, colormap_max_val] = get_boundaries(
-        kl_cube, voronoi_cube, val, val, time, freq_offset, antenna, polarization_idx
+        kl_cube, voronoi_cube, val, val, time, freq, antenna, polarization_idx
     )
 
     fig, ax = plt.subplots(1, 2, figsize=(15, 15))
     ax[0].imshow(
-        kl_cube.data[time, freq_offset, antenna, polarization_idx, :, :],
+        kl_cube.data[time, freq, antenna, polarization_idx, :, :],
         vmin=colormap_min_val,
         vmax=colormap_max_val,
     )
     ax[0].scatter(
         coord_patch_x,
         coord_patch_y,
-        c=val[time, freq_offset, antenna, :],
+        c=val[time, freq, antenna, :],
         vmin=colormap_min_val,
         vmax=colormap_max_val,
         edgecolors="black",
@@ -183,14 +206,14 @@ if __name__ == "__main__":
     )
     ax[0].set_title("Karhunen Loève screens")
     ax[1].imshow(
-        voronoi_cube.data[time, freq_offset, antenna, polarization_idx, :, :],
+        voronoi_cube.data[time, freq, antenna, polarization_idx, :, :],
         vmin=colormap_min_val,
         vmax=colormap_max_val,
     )
     ax[1].scatter(
         coord_patch_x,
         coord_patch_y,
-        c=val[time, freq_offset, antenna, :],
+        c=val[time, freq, antenna, :],
         vmin=colormap_min_val,
         vmax=colormap_max_val,
         edgecolors="black",
@@ -198,3 +221,12 @@ if __name__ == "__main__":
         s=150,
     )
     ax[1].set_title("Voronoi screens")
+
+
+if __name__ == "__main__":
+    plot_screens(
+        "../resources/solutions.h5",
+        "../resources/kl_0.fits",
+        "../resources/tessellated_0.fits",
+        "../resources/skymodel.txt",
+    )
