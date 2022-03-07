@@ -95,10 +95,10 @@ def get_phase_corrected(phase, ref_antenna=0):
 
 
 def plot_screens(
-    h5_solution,
-    kl_screen,
-    voronoi_screen,
-    skymodel,
+    solution_filename,
+    kl_screen_filename,
+    tessellated_screen_filename,
+    skymodel_filename,
     polarization_idx=1,
     time=0,
     antenna=1,
@@ -107,13 +107,13 @@ def plot_screens(
     """Plot fitted screens with the discrete input points overlaid
     Parameters
     ----------
-    h5_solution : string
+    solution_filename : string
         Path to solution file (h5)
-    kl_screen : string
+    kl_screen_filename : string
         Path to kl screens (fits)
-    voronoi_screen : string
+    tessellated_screen_filename : string
         Path to voronoi screens (fits)
-    skymodel : string
+    skymodel_filename : string
         Path to skymodel file
     polarization_idx : int
         Polarization index to plot
@@ -129,21 +129,21 @@ def plot_screens(
     # Load input/outputs
     # SCREEN FITTING INPUTS:
     # Load solutions.h5 and skymodel
-    f = h5py.File(h5_solution, "r")
+    f = h5py.File(solution_filename, "r")
 
     # SCREEN FITTING OUTPUTS:
     # The screen fitting library produces as output a .fits image cube.
     # The outputs of the two different algorithms are loaded below as
     # "kl_cube" and "voronoi_cube"
     # the cube dimensions are = ["time", "freqs", "antennas", "pol", "x_coord", "y_coord"]
-    kl_cube = fits.open(kl_screen)[0]
-    voronoi_cube = fits.open(voronoi_screen)[0]
+    kl_cube = fits.open(kl_screen_filename)[0]
+    voronoi_cube = fits.open(tessellated_screen_filename)[0]
 
     # STEP 2
     # Convert the coordinates of the patches in the skymodel to
     # x,y coordinates in the screen
     # build image cube with reference points
-    radec_coord = processing_utils.read_patch_list(skymodel, f, "phase000")
+    radec_coord = processing_utils.read_patch_list(skymodel_filename, f, "phase000")
     w = wcs.WCS(kl_cube.header)
     [coord_patch_x, coord_patch_y] = processing_utils.get_patch_coordinates(
         radec_coord, w
