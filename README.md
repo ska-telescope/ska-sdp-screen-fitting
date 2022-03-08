@@ -10,6 +10,9 @@ There are two algotihms available for screen fitting:
 The screens obtained can be used to apply direction dependent effects during the imaging process with IDG in WSClean. 
 Refer to https://wsclean.readthedocs.io/en/latest/a_term_correction.html?highlight=screen in the section "Diagonal gain correction" for more details.
 
+Below is an image containing the KL screens (TOP) and the Voronoi screens (second row) with an overlay of the original value of the calibration solution at the position of the patches.
+The screen containing the original values at the patches coordinates is at the bottom.
+![](resources/screens_.png)
 
 ## Installation
 In order to clone and work with this repository, you need to have poetry installed. You can get it with:

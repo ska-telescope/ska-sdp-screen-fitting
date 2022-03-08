@@ -11,6 +11,7 @@ import pickle
 import shutil
 from math import modf
 
+import lsmtool
 import numpy as np
 import psutil
 from astropy.io import fits as pyfits
@@ -229,11 +230,11 @@ def make_template_image(
     else:
         if aterm_type == "gain":
             # gain aterm images: add MATRIX info
-            header["CRVAL{i}"] = 0.0
-            header["CDELT{i}"] = 1.0
-            header["CRPIX{i}"] = 1.0
-            header["CUNIT{i}"] = ""
-            header["CTYPE{i}"] = "MATRIX"
+            header[f"CRVAL{i}"] = 0.0
+            header[f"CDELT{i}"] = 1.0
+            header[f"CRPIX{i}"] = 1.0
+            header[f"CUNIT{i}"] = ""
+            header[f"CTYPE{i}"] = "MATRIX"
             i += 1
 
         # dTEC or gain: add ANTENNA info
@@ -611,3 +612,74 @@ def get_available_memory():
     mem = psutil.virtual_memory()
     available_gb = int(np.floor(mem.available / 1024 / 1024 / 1024))
     return available_gb
+
+
+def read_patch_list(skymodel, h5_file, soltab):
+
+    """Read patch coordinates from skymodel file
+    Parameters
+    ----------
+    skymodel : string
+        Path to skymodel file
+    h5_file : string
+        Path to h5 file
+    soltab : string
+        Solution tab name
+
+    Returns
+    -------
+    source_positions : array
+        Source position read from skymodel (ra-dec)
+    """
+
+    skymod = lsmtool.load(skymodel)
+    source_dict = skymod.getPatchPositions()
+    source_positions = []
+    for source in list(h5_file[f"sol000/{soltab}/dir"]):
+        radecpos = source_dict[str(source, "utf-8").strip("[]")]
+        source_positions.append([radecpos[0].value, radecpos[1].value])
+    source_positions = np.array(source_positions)
+    return source_positions
+
+
+def get_patch_coordinates(source_positions, wcs_obj):
+
+    """Convert coordinates from ra-dec to pixel coordinates
+    Parameters
+    ----------
+    source_positions : array
+        Source position read from skymodel (ra-dec)
+    wcs_obj : wcs object
+        Wcs object containing input fits information for the conversion
+
+    Returns
+    -------
+    coord_patch_x : array
+        Pixel x-coordinate of sources
+    coord_patch_y : array
+        Pixel y-coordinate of sources
+    """
+
+    ra_ind = wcs_obj.axis_type_names.index("RA")
+    dec_ind = wcs_obj.axis_type_names.index("DEC")
+
+    # Convert ra-dec to pixel coordinates
+    ras = source_positions[:, 0]
+    dec = source_positions[:, 1]
+    xy_coord = []
+    coord_patch_x = []
+    coord_patch_y = []
+    for ra_vert, dec_vert in zip(ras, dec):
+        ra_dec = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
+        ra_dec[0][ra_ind] = ra_vert
+        ra_dec[0][dec_ind] = dec_vert
+        xy_coord.append(
+            (
+                wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind],
+                wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind],
+            )
+        )
+        coord_patch_x.append(wcs_obj.wcs_world2pix(ra_dec, 0)[0][ra_ind])
+        coord_patch_y.append(wcs_obj.wcs_world2pix(ra_dec, 0)[0][dec_ind])
+
+    return coord_patch_x, coord_patch_y

@@ -7,9 +7,14 @@ import os
 import shutil
 import uuid
 
+import h5py
+import numpy as np
 import pytest
+from astropy import wcs
+from astropy.io import fits
 
 from ska_sdp_screen_fitting.make_aterm_images import make_aterm_image
+from ska_sdp_screen_fitting.utils import processing_utils
 
 CWD = os.getcwd()
 SOLFILE = "solutions.h5"
@@ -41,24 +46,86 @@ def test_fit_voronoi_screens():
     """
 
     method = "tessellated"
+    soltab = "phase000"
     make_aterm_image(
         SOLFILE,
-        soltabname="phase000",
+        soltabname=soltab,
         screen_type=method,
         outroot=method,
-        bounds_deg=[126.966898, 63.566717, 124.546030, 64.608827],
-        bounds_mid_deg=[125.779167, 64.092778],
+        bounds_deg=[124.565, 66.165, 127.895, 62.835],
+        bounds_mid_deg=[126.23, 64.50],
         skymodel=SKYMODEL,
         solsetname="sol000",
-        padding_fraction=1.4,
+        padding_fraction=0,
         cellsize_deg=0.2,
-        smooth_deg=0,
+        smooth_deg=0.1,
         ncpu=0,
     )
 
+    # Assert that solution files are generated
     assert os.path.isfile(f"{method}_0.fits")
     assert os.path.isfile(f"{method}_template.fits")
     assert os.path.isfile(f"{method}.txt")
+
+    # Load h5 solutions and image cube and calculate the error at the
+    # patch coordinates
+    # 1 - Get the pixel coordinate of the patches
+    # 2 - Open the calibration solution and correct for the phase reference
+    h5_file = h5py.File(SOLFILE, "r")
+    radec_coord = processing_utils.read_patch_list(SKYMODEL, h5_file, soltab)
+    filename = f"{method}_0.fits"
+    hdu = fits.open(filename)
+    wcs_obj = wcs.WCS(hdu[0].header)
+    [coord_x, coord_y] = processing_utils.get_patch_coordinates(
+        radec_coord, wcs_obj
+    )
+    screen_cube = hdu[0].data
+    im_size = screen_cube.shape[4]
+    phase = h5_file["sol000/phase000/val"]
+
+    # re-arrange axes to allow correct broadcasting
+    ref_antenna = 0
+    phase_corrected = np.zeros(
+        (
+            screen_cube.shape[0],
+            screen_cube.shape[1],
+            screen_cube.shape[2],
+            len(radec_coord),
+        )
+    )
+    phase_corrected = (
+        np.transpose(phase, (2, 0, 1, 3)) - phase[:, :, ref_antenna, :]
+    )
+    phase_corrected = np.transpose(phase_corrected, (1, 2, 0, 3))
+
+    # Assert that the error at the position of the patch is smaller
+    # than the threshold
+    threshold = 1e-4
+    for i in enumerate(coord_x):
+        y_coord = int(np.round(coord_x[i[0]]))
+        x_coord = int(np.round(coord_y[i[0]]))
+        if 0 <= x_coord < im_size:
+            if 0 <= y_coord < im_size:
+                assert (
+                    screen_cube[:, :, :, 0, x_coord, y_coord]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
+                assert (
+                    screen_cube[:, :, :, 1, x_coord, y_coord]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
+                assert (
+                    screen_cube[:, :, :, 2, x_coord, y_coord]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
+                assert (
+                    screen_cube[:, :, :, 3, x_coord, y_coord]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
 
 
 def test_fit_kl_screens():
@@ -66,21 +133,83 @@ def test_fit_kl_screens():
     Tests kl screens generation
     """
 
+    soltab = "phase000"
     method = "kl"
     make_aterm_image(
         SOLFILE,
-        soltabname="gain000",
+        soltabname=soltab,
         screen_type=method,
         outroot=method,
-        bounds_deg=[126.966898, 63.566717, 124.546030, 64.608827],
-        bounds_mid_deg=[125.779167, 64.092778],
+        bounds_deg=[124.565, 66.165, 127.895, 62.835],
+        bounds_mid_deg=[126.23, 64.50],
         skymodel=SKYMODEL,
         solsetname="sol000",
-        padding_fraction=1.4,
+        padding_fraction=0,
         cellsize_deg=0.2,
-        smooth_deg=0,
+        smooth_deg=0.1,
         ncpu=0,
     )
 
+    # Assert that solution files are generated
     assert os.path.isfile(f"{method}_0.fits")
     assert os.path.isfile(f"{method}.txt")
+
+    # Load h5 solutions and image cube and calculate the error at the
+    # patch coordinates
+    # 1 - Get the pixel coordinate of the patches
+    # 2 - Open the calibration solution and correct for the phase reference
+    h5_file = h5py.File(SOLFILE, "r")
+    radec_coord = processing_utils.read_patch_list(SKYMODEL, h5_file, soltab)
+    filename = f"{method}_0.fits"
+    hdu = fits.open(filename)
+    wcs_obj = wcs.WCS(hdu[0].header)
+    [coord_x, coord_y] = processing_utils.get_patch_coordinates(
+        radec_coord, wcs_obj
+    )
+
+    screen_cube = hdu[0].data
+    im_size = screen_cube.shape[4]
+    phase = h5_file["sol000/phase000/val"]
+
+    phase_corrected = np.zeros(
+        (
+            screen_cube.shape[0],
+            screen_cube.shape[1],
+            screen_cube.shape[2],
+            len(radec_coord),
+        )
+    )
+    ref_antenna = 0
+    phase_corrected = (
+        np.transpose(phase, (2, 0, 1, 3)) - phase[:, :, ref_antenna, :]
+    )
+    phase_corrected = np.transpose(phase_corrected, (1, 2, 0, 3))
+
+    # Assert that the error at the position of the patch is smaller
+    # than the threshold
+    threshold = 1e-1
+    for i in enumerate(coord_x):
+        y_coord = int(np.round(coord_x[i[0]]))
+        x_coord = int(np.round(coord_y[i[0]]))
+        if 0 <= x_coord < im_size:
+            if 0 <= y_coord < im_size:
+                assert (
+                    screen_cube[:, :, :, 0, x_coord, y_coord]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
+                assert (
+                    screen_cube[:, :, :, 1, x_coord, y_coord]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
+                assert (
+                    screen_cube[:, :, :, 2, x_coord, y_coord]
+                    - np.cos(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
+                assert (
+                    screen_cube[:, :, :, 3, x_coord, y_coord]
+                    - np.sin(phase_corrected[:, :, :, i[0]])
+                    < threshold
+                ).all()
